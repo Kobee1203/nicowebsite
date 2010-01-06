@@ -1,0 +1,23 @@
+/* reset some stuff */
+h1,h2,hr,ul,ins{margin:0px;padding:0px;border: 0px;text-decoration:none;}
+
+html { overflow-y: scroll; }
+
+/* body stuff */
+body {
+	
+	background-image: url(../img/shadow.png);
+	background-color: #F3F3F3;
+	background-repeat: repeat-x;
+	font-family: 'Helvetica Neue',Helvetica,'Lucida Grande',Arial,Verdana,Sans-Serif;
+	color: #333;
+	cursor: default;
+}
+
+/* a nice little line */
+hr {
+	background-color: #ccc;
+  /*background: transparent url(../img/divider.png) no-repeat;*/
+	margin: 0px -15px 50px -15px;
+	height: 2px;
+}
