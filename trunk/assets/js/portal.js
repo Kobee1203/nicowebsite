@@ -207,13 +207,15 @@ var Portal = Class.create({
     
     // Create and add the new column to the portal
     var column = new Column(this, options);
-    
+    console.log('add real width: ' + column.getRealWidth());
+    console.log('add real min-width: ' + column.getRealWidth());
     var remainWidth = column.getRealMinWidth();
+    //var remainWidth = column.getMinWidth();
     var modifiedColumns = new HashMap();
     for(var index = this.columnsArray.length; index > 0; index--) {
       var col = this.columnsArray[index - 1];
       var width = col.getRealWidth();
-      var minWidth = col.getMinWidth();
+      var minWidth = col.getRealMinWidth();
       if((width - remainWidth) > minWidth) {
         modifiedColumns.put(col, (width - remainWidth));
         remainWidth = 0;
@@ -348,7 +350,7 @@ var Column = Class.create({
   
   getRealWidth : function() {
     if(!this.realWidth) {
-      calculateRealWidth();
+      this.calculateRealWidth();
     }
     
     return parseFloat(this.element.getStyle('width'));
@@ -361,7 +363,7 @@ var Column = Class.create({
   
   getRealMinWidth : function() {
     if(!this.realMinWidth) {
-      calculateRealWidth();
+      this.calculateRealWidth();
     }
     
     return this.realMinWidth;
@@ -372,25 +374,32 @@ var Column = Class.create({
   // Call this method after having added the column to the parent
   calculateRealWidth : function() {
 		  
+		  var pixelsInMorePercent = this.pixelsInMorePercent();
+      console.log('pixelsInMorePercent: ' + pixelsInMorePercent);
+		  
       // Calculate the new column width in percentage
 		  var sWidth = this.element.getStyle('width');
-		  if(sWidth.endsWith('%')) {
+		  console.log('sWidth: ' + sWidth);
+      if(sWidth.endsWith('%')) {
 		    var width = parseFloat(sWidth);
       } else {
-        var width = parseFloat(sWidth) * 100 / this.element.parentNode.getWidth();
+        var width = (parseFloat(sWidth) * 100 / this.element.parentNode.getWidth();
       }
-
+      
       // Check if the width is not defined
       if(width <=0) {
         // Calculate the new column width in percentage from the minimum width
-        var width = this.getMinWidth();
+        var width = this.getMinWidth() + pixelsInMorePercent;
+        this.realWidth = width;
+        this.realMinWidth = width;
+        console.log('min-width: '+ this.getMinWidth() + ', real-min-width=width: ' + width);
       }
-      
-      var pixelsInMorePercent = this.pixelsInMorePercent();
-      
-      // Set the real width in percentage without pixels in more      
-      this.realWidth = width - pixelsInMorePercent;
-      this.realMinWidth = this.getMinWidth() + pixelsInMorePercent;
+      else {
+        // Set the real width in percentage without pixels in more      
+        this.realWidth = width - pixelsInMorePercent;
+        this.realMinWidth = this.getMinWidth() + pixelsInMorePercent;
+        console.log('width: ' + width + ', min-width: '+ this.getMinWidth() + ', real-min-width: ' + this.realMinWidth);
+      }
       
       // Set the column width in percentage
       this.element.setStyle({width : this.realWidth+'%'});
@@ -451,9 +460,9 @@ var Column = Class.create({
         if (confirm('Are you sure you wish to delete portal column?')) {
           //$('wrapper').setStyle({width: ($('wrapper').getWidth() - column.getWidth())+'px'});
           var id = this.element.id;
-          // TODO : un coup il faut ajouter ce qui est commenté, un coup non !!!!
+          // TODO : un coup il faut ajouter ce qui est commenté, un coup non !!!! -> lié au min width pas correct
           var w = this.getRealWidth();// + this.pixelsInMorePercent();
-
+          console.log('w: '+w);
           // remove splitpanes (left and/or right) and create new splitpane if necessary
           this.portal.removeSplitPaneFromColumn(this);
           
@@ -465,6 +474,7 @@ var Column = Class.create({
           if(this.portal.columnsArray.length > 0) {
             var lastColumn = this.portal.columnsArray[this.portal.columnsArray.length - 1];
             var newWidth = lastColumn.getRealWidth() + lastColumn.pixelsInMorePercent() + w;
+            console.log('newWidth: '+newWidth+', realWidth: '+lastColumn.getRealWidth()+', pixels in more: '+lastColumn.pixelsInMorePercent());
             lastColumn.element.setStyle({width: newWidth + '%'});
           }
           
