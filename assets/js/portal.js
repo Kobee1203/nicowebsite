@@ -170,26 +170,31 @@ var Portal = Class.create({
   },
   
   removeSplitPaneFromColumn : function(column) {
-    console.log('removing: '+SplitPane.cache.length);
+
+    var index = this.columnsArray.indexOf(column);
+    console.log('index: '+index);
+
     if(column.splitPaneLeft) {
       var leftElement = column.splitPaneLeft.div1;
       column.splitPaneLeft.divider.remove();
       SplitPane.cache.removeByElement(column.splitPaneLeft);
       SplitPane.cacheIndex = SplitPane.cacheIndex - 1;
-      console.log('remove left: '+SplitPane.cache.length);
+      
+      column.splitPaneLeft = null;
+      this.columnsArray[index - 1].splitPaneRight = null;
     }
     if(column.splitPaneRight) {
       var rightElement = column.splitPaneRight.div2;
       column.splitPaneRight.divider.remove();
       SplitPane.cache.removeByElement(column.splitPaneRight);
       SplitPane.cacheIndex = SplitPane.cacheIndex - 1;
-      console.log('remove right: '+SplitPane.cache.length);
+      
+      column.splitPaneRight = null;
+      this.columnsArray[index + 1].splitPaneLeft = null;
     }
     
     // Add new splitpane if necessary 
     if(leftElement && rightElement) {
-      var index = this.columnsArray.indexOf(column);
-      console.log('index: '+index);
       this.addSplitPane(this.columnsArray[index - 1], this.columnsArray[index + 1]);
       SplitPane.cache[SplitPane.cacheIndex - 1].set();
       console.log('splitpane created: '+SplitPane.cache.length);
@@ -203,27 +208,27 @@ var Portal = Class.create({
           width : '100%'
         }
       };
-    }
-    
-    // Create and add the new column to the portal
-    var column = new Column(this, options);
-    console.log('add real width: ' + column.getRealWidth());
-    console.log('add real min-width: ' + column.getRealWidth());
-    var remainWidth = column.getRealMinWidth();
-    //var remainWidth = column.getMinWidth();
-    var modifiedColumns = new HashMap();
-    for(var index = this.columnsArray.length; index > 0; index--) {
-      var col = this.columnsArray[index - 1];
-      var width = col.getRealWidth();
-      var minWidth = col.getRealMinWidth();
-      if((width - remainWidth) > minWidth) {
-        modifiedColumns.put(col, (width - remainWidth));
-        remainWidth = 0;
-        break;
-      } else {
-        var diff = width - minWidth;
-        modifiedColumns.put(col, minWidth);
-        remainWidth = remainWidth - diff;
+      var column = new Column(this, options);
+      var remainWidth = 0;
+      var modifiedColumns = new HashMap();
+    } else {
+      // Create and add the new column to the portal
+      var column = new Column(this, options);
+      var remainWidth = column.getRealMinWidth();
+      var modifiedColumns = new HashMap();
+      for(var index = this.columnsArray.length; index > 0; index--) {
+        var col = this.columnsArray[index - 1];
+        var width = col.getRealWidth();
+        var minWidth = col.getMinWidth();
+        if((width - remainWidth) > minWidth) {
+          modifiedColumns.put(col, (width - remainWidth));
+          remainWidth = 0;
+          break;
+        } else {
+          var diff = width - minWidth;
+          modifiedColumns.put(col, minWidth);
+          remainWidth = remainWidth - diff;
+        }
       }
     }
     
@@ -375,30 +380,27 @@ var Column = Class.create({
   calculateRealWidth : function() {
 		  
 		  var pixelsInMorePercent = this.pixelsInMorePercent();
-      console.log('pixelsInMorePercent: ' + pixelsInMorePercent);
 		  
       // Calculate the new column width in percentage
 		  var sWidth = this.element.getStyle('width');
-		  console.log('sWidth: ' + sWidth);
       if(sWidth.endsWith('%')) {
 		    var width = parseFloat(sWidth);
       } else {
-        var width = (parseFloat(sWidth) * 100 / this.element.parentNode.getWidth();
+        var width = (parseFloat(sWidth) * 100) / this.element.parentNode.getWidth();
+        width = width + pixelsInMorePercent;
       }
       
       // Check if the width is not defined
       if(width <=0) {
         // Calculate the new column width in percentage from the minimum width
         var width = this.getMinWidth() + pixelsInMorePercent;
-        this.realWidth = width;
+        this.realWidth = this.getMinWidth();
         this.realMinWidth = width;
-        console.log('min-width: '+ this.getMinWidth() + ', real-min-width=width: ' + width);
       }
       else {
         // Set the real width in percentage without pixels in more      
         this.realWidth = width - pixelsInMorePercent;
         this.realMinWidth = this.getMinWidth() + pixelsInMorePercent;
-        console.log('width: ' + width + ', min-width: '+ this.getMinWidth() + ', real-min-width: ' + this.realMinWidth);
       }
       
       // Set the column width in percentage
@@ -460,9 +462,8 @@ var Column = Class.create({
         if (confirm('Are you sure you wish to delete portal column?')) {
           //$('wrapper').setStyle({width: ($('wrapper').getWidth() - column.getWidth())+'px'});
           var id = this.element.id;
-          // TODO : un coup il faut ajouter ce qui est commenté, un coup non !!!! -> lié au min width pas correct
-          var w = this.getRealWidth();// + this.pixelsInMorePercent();
-          console.log('w: '+w);
+          var w = this.getRealWidth();
+
           // remove splitpanes (left and/or right) and create new splitpane if necessary
           this.portal.removeSplitPaneFromColumn(this);
           
@@ -474,7 +475,6 @@ var Column = Class.create({
           if(this.portal.columnsArray.length > 0) {
             var lastColumn = this.portal.columnsArray[this.portal.columnsArray.length - 1];
             var newWidth = lastColumn.getRealWidth() + lastColumn.pixelsInMorePercent() + w;
-            console.log('newWidth: '+newWidth+', realWidth: '+lastColumn.getRealWidth()+', pixels in more: '+lastColumn.pixelsInMorePercent());
             lastColumn.element.setStyle({width: newWidth + '%'});
           }
           
