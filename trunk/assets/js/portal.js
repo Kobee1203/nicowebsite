@@ -50,7 +50,6 @@ var Portal = Class.create({
 		
 		// loop trough blocks
 		$A(blocks).each(function(block) {
-		  //console.log('Block '+block.id+'') 
 		  this.initBlock(block);
     }.bind(this));
 	},
@@ -170,9 +169,7 @@ var Portal = Class.create({
   },
   
   removeSplitPaneFromColumn : function(column) {
-
     var index = this.columnsArray.indexOf(column);
-    console.log('index: '+index);
 
     if(column.splitPaneLeft) {
       var leftElement = column.splitPaneLeft.div1;
@@ -197,7 +194,6 @@ var Portal = Class.create({
     if(leftElement && rightElement) {
       this.addSplitPane(this.columnsArray[index - 1], this.columnsArray[index + 1]);
       SplitPane.cache[SplitPane.cacheIndex - 1].set();
-      console.log('splitpane created: '+SplitPane.cache.length);
     }
   },
 
@@ -362,8 +358,12 @@ var Column = Class.create({
   },
   
   getMinWidth : function() {
+    if(!this.minWidth) {
+      this.calculateRealWidth();
+    }
+    
     // The minimum with in percentage
-    return parseFloat(this.options.style.minWidth) * 100 / this.element.parentNode.getWidth();
+    return this.minWidth;
   },
   
   getRealMinWidth : function() {
@@ -371,8 +371,8 @@ var Column = Class.create({
       this.calculateRealWidth();
     }
     
+    // The real minimum with in percentage
     return this.realMinWidth;
-    //return parseFloat(this.element.getStyle('min-width'));
   },
   
   // Calculate column width in percentage in removing pixels in more (borders, paddings, margins)
@@ -381,26 +381,29 @@ var Column = Class.create({
 		  
 		  var pixelsInMorePercent = this.pixelsInMorePercent();
 		  
+		  this.minWidth = parseFloat(this.options.style.minWidth) * 100.0 / this.element.parentNode.getWidth();
+		  this.minWidth = this.minWidth.round(4);
+		  
       // Calculate the new column width in percentage
 		  var sWidth = this.element.getStyle('width');
       if(sWidth.endsWith('%')) {
 		    var width = parseFloat(sWidth);
       } else {
-        var width = (parseFloat(sWidth) * 100) / this.element.parentNode.getWidth();
-        width = width + pixelsInMorePercent;
+        var width = (parseFloat(sWidth) * 100.0) / this.element.parentNode.getWidth();
+        width = width.round(4) + pixelsInMorePercent;
       }
       
       // Check if the width is not defined
       if(width <=0) {
         // Calculate the new column width in percentage from the minimum width
-        var width = this.getMinWidth() + pixelsInMorePercent;
-        this.realWidth = this.getMinWidth();
+        var width = this.minWidth + pixelsInMorePercent;
+        this.realWidth = this.minWidth;
         this.realMinWidth = width;
       }
       else {
         // Set the real width in percentage without pixels in more      
         this.realWidth = width - pixelsInMorePercent;
-        this.realMinWidth = this.getMinWidth() + pixelsInMorePercent;
+        this.realMinWidth = this.minWidth + pixelsInMorePercent;
       }
       
       // Set the column width in percentage
@@ -425,9 +428,9 @@ var Column = Class.create({
 	  pixelsInMore += borderRightWidth || 0;
     
     // Calculate the pixels in more in percentage according to the 'portal' parent
-    var pixelsInMorePercent = pixelsInMore * 100 / this.element.parentNode.getWidth();
+    var pixelsInMorePercent = (pixelsInMore * 100.0) / this.element.parentNode.getWidth();
     
-    return pixelsInMorePercent;
+    return pixelsInMorePercent.round(4);
   },
   
   setSplitPaneLeft : function(splitPaneLeft) {
@@ -501,10 +504,10 @@ Array.prototype.removeByElement = function(arrayElement) {
   } 
 }
 
-Number.prototype.arrondi = function(exp) {
-        var virgule = Math.round(Math.pow(10, exp));
-        return Math.round(this*virgule)/virgule;
+Number.prototype.round = function(exp) {
+  var virgule = Math.round(Math.pow(10, exp));
+  return Math.round(this*virgule)/virgule;
 };
 test = 21.6546;
-testarrondi=test.arrondi(3)
+testarrondi=test.round(3)
 //console.log(testarrondi);
