@@ -382,7 +382,7 @@ var Column = Class.create({
 		  var pixelsInMorePercent = this.pixelsInMorePercent();
 		  
 		  this.minWidth = parseFloat(this.options.style.minWidth) * 100.0 / this.element.parentNode.getWidth();
-		  this.minWidth = this.minWidth.round(4);
+		  this.minWidth = this.minWidth.roundNumber(4);
 		  
       // Calculate the new column width in percentage
 		  var sWidth = this.element.getStyle('width');
@@ -390,7 +390,7 @@ var Column = Class.create({
 		    var width = parseFloat(sWidth);
       } else {
         var width = (parseFloat(sWidth) * 100.0) / this.element.parentNode.getWidth();
-        width = width.round(4) + pixelsInMorePercent;
+        width = width.roundNumber(4) + pixelsInMorePercent;
       }
       
       // Check if the width is not defined
@@ -430,7 +430,7 @@ var Column = Class.create({
     // Calculate the pixels in more in percentage according to the 'portal' parent
     var pixelsInMorePercent = (pixelsInMore * 100.0) / this.element.parentNode.getWidth();
     
-    return pixelsInMorePercent.round(4);
+    return pixelsInMorePercent.roundNumber(4);
   },
   
   setSplitPaneLeft : function(splitPaneLeft) {
@@ -504,10 +504,10 @@ Array.prototype.removeByElement = function(arrayElement) {
   } 
 }
 
-Number.prototype.round = function(exp) {
+Number.prototype.roundNumber = function(exp) {
   var virgule = Math.round(Math.pow(10, exp));
   return Math.round(this*virgule)/virgule;
 };
 test = 21.6546;
-testarrondi=test.round(3)
+testarrondi=test.roundNumber(3);
 //console.log(testarrondi);
