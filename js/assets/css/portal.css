@@ -1,0 +1,128 @@
+/* set some wrapper values */
+#wrapper{
+	width: 840px;
+	border: 1px solid;
+	margin: 0 auto 0 auto;
+}
+
+/* all columns */
+#columns .column {
+
+	margin: 0 5px 0 5px;
+	
+	min-height: 200px; /* set a min-height to ensure a target dropzone */
+	
+	border: 2px solid #F3F3F3;
+	
+	padding: 3px;
+	
+	float: left;
+}
+
+#columns .column:hover {
+
+	padding: 3px;
+	
+	border: 2px dashed #ccc;
+	
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+}
+
+#columns .column div {
+	
+	background-color: #FFFFFF;
+	
+	border: 1px solid #CCCCCC;
+	
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	
+	margin-bottom: 20px;
+}
+
+#columns .column div h1 {
+	
+	font-size: 12px;
+	
+	padding: 7px;
+	
+	background-color: #E0E0E0;
+}
+
+#columns .column div p {
+	
+	font-size: 11px;
+	
+	padding: 7px;
+}
+
+#columns .target {
+	
+	padding: 3px;
+	
+	border: 2px dashed #ccc;
+	
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+}
+
+
+.block .draghandle{
+	cursor: move;
+}
+
+.block-controls {
+  float:right;
+}
+.block-controls a {
+  color:#999999;
+  font-size:11px;
+}
+.block-controls a:hover {
+  text-decoration:none;
+}
+.block-controls .block-remove:hover {
+  cursor: pointer;
+}
+
+.column-controls {
+  float:right;
+}
+.column-controls a {
+  color:#999999;
+  font-size:11px;
+}
+.column-controls a:hover {
+  text-decoration:none;
+}
+.column-controls .column-remove:hover {
+  cursor: pointer;
+}
+
+
+/* column specific styles */
+/*#columns .menu {
+	width: 200px;
+	/*width: 25%;/
+}
+
+#columns .blocks {
+	width: 400px;
+	/*width: 55%;/
+}
+
+#columns .sidebar {
+	width: 180px;
+	/*width: 20%;/
+}
+*/
+#columns .menu div h1{
+
+	background-color: #ccc;
+}
+
+#columns .sidebar div h1{
+
+	background-color: #e6e6e6;
+}
