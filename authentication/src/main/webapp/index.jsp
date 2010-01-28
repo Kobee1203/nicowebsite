@@ -7,6 +7,8 @@
 	<body>
 		<f:view>
 			<h1>Hello world</h1>
+			<h:outputText value="Nom:" />
+			<h:outputText value="#{homeBean.test}"/>
 		</f:view>
 	</body>
 </html>
