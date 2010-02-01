@@ -1,10 +1,13 @@
-<?xml version="1.0"?>
-<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
-<web-app>
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+    version="2.5">
+    
     <display-name>authentication</display-name>
     <description>
         Authentication String JSF Hibernate
     </description>
+    
     <!-- JavaServer Faces -->
     <context-param>
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
@@ -48,6 +51,19 @@
 	   <param-value>/WEB-INF/classes/faces-config/navigation.xml,/WEB-INF/classes/faces-config/faces-config.xml</param-value>
     </context-param>
     
+    <!-- Filter added for richfaces -->
+    <filter>
+        <display-name>RichFaces Filter</display-name>
+        <filter-name>richfaces</filter-name>
+        <filter-class>org.ajax4jsf.Filter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>richfaces</filter-name>
+        <servlet-name>Faces Servlet</servlet-name>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
     
 	<welcome-file-list>
 	   <welcome-file>default.jsp</welcome-file>
