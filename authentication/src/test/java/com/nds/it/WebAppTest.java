@@ -28,8 +28,8 @@ public class WebAppTest {
 	@Test
 	public void testCallIndexPage() throws Exception {
 		selenium.open("http://localhost:8080/authentication/index.html");
-		selenium.waitForPageToLoad("5000");
-		Assert.assertTrue(selenium.isTextPresent("Hello World!"));
+		selenium.waitForPageToLoad("60000");
 		Assert.assertEquals("Hello World", selenium.getTitle());
+		Assert.assertTrue(selenium.isTextPresent("Hello World!"));
 	}
 }
