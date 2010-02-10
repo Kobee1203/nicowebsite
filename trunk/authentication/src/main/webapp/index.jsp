@@ -8,7 +8,7 @@
 	</head>
 	<body>
 		<f:view>
-			<h1>Hello world</h1>
+			<h1>Hello World!</h1>
 			<h:outputText value="Nom:" />
 			<h:outputText value="#{homeBean.test}"/>
 			
