@@ -9,28 +9,53 @@
     <extraInfo>%0D%0A%09++%0D%0A++++</extraInfo>
     <webPath>/authentication</webPath>
     <webClassPathEntries>
-        <webClassPathEntry>/authentication/target/classes</webClassPathEntry>
+        <webClassPathEntry>/authentication/src/main/webapp/WEB-INF/classes</webClassPathEntry>
         <webClassPathEntry>/authentication/target/test-classes</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/aopalliance/aopalliance/1.0/aopalliance-1.0.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/com/sun/faces/jsf-api/2.0.2/jsf-api-2.0.2.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/com/sun/faces/jsf-impl/2.0.2/jsf-impl-2.0.2.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/commons-codec/commons-codec/1.2/commons-codec-1.2.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/commons-collections/commons-collections/3.2/commons-collections-3.2.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/commons-digester/commons-digester/1.8.1/commons-digester-1.8.1.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/commons-httpclient/commons-httpclient/3.0.1/commons-httpclient-3.0.1.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/javax/servlet/jstl/1.1.2/jstl-1.1.2.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/junit/junit/4.3.1/junit-4.3.1.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/log4j/log4j/1.2.14/log4j-1.2.14.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/net/sourceforge/nekohtml/nekohtml/1.9.7/nekohtml-1.9.7.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/aspectj/aspectjrt/1.6.5/aspectjrt-1.6.5.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/aspectj/aspectjweaver/1.6.5/aspectjweaver-1.6.5.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/openid4java/openid4java-consumer-SampleConsumer/0.9.5/openid4java-consumer-SampleConsumer-0.9.5.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/openid4java/openid4java-consumer/0.9.5/openid4java-consumer-0.9.5.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/openid4java/openid4java-nodeps/0.9.5/openid4java-nodeps-0.9.5.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/openid4java/openid4java-server-JdbcServerAssociationStore/0.9.5/openid4java-server-JdbcServerAssociationStore-0.9.5.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/openid4java/openid4java-server-SampleServer/0.9.5/openid4java-server-SampleServer-0.9.5.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/openid4java/openid4java-server/0.9.5/openid4java-server-0.9.5.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/openid4java/openid4java/0.9.5/openid4java-0.9.5.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/richfaces/framework/richfaces-api/3.3.3.BETA1/richfaces-api-3.3.3.BETA1.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/richfaces/framework/richfaces-impl-jsf2/3.3.3.BETA1/richfaces-impl-jsf2-3.3.3.BETA1.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/richfaces/ui/richfaces-ui/3.3.3.BETA1/richfaces-ui-3.3.3.BETA1.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/seleniumhq/selenium/client-drivers/selenium-java-client-driver/1.0.1/selenium-java-client-driver-1.0.1.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/security/spring-security-acl/3.0.0.RELEASE/spring-security-acl-3.0.0.RELEASE.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/security/spring-security-config/3.0.0.RELEASE/spring-security-config-3.0.0.RELEASE.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/security/spring-security-core/3.0.0.RELEASE/spring-security-core-3.0.0.RELEASE.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/security/spring-security-openid/3.0.0.RELEASE/spring-security-openid-3.0.0.RELEASE.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/security/spring-security-taglibs/3.0.0.RELEASE/spring-security-taglibs-3.0.0.RELEASE.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/security/spring-security-web/3.0.0.RELEASE/spring-security-web-3.0.0.RELEASE.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/spring-aop/3.0.0.RELEASE/spring-aop-3.0.0.RELEASE.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/spring-asm/3.0.0.RELEASE/spring-asm-3.0.0.RELEASE.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/spring-beans/3.0.0.RELEASE/spring-beans-3.0.0.RELEASE.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/spring-context-support/3.0.0.RELEASE/spring-context-support-3.0.0.RELEASE.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/spring-context/3.0.0.RELEASE/spring-context-3.0.0.RELEASE.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/spring-core/3.0.0.RELEASE/spring-core-3.0.0.RELEASE.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/spring-expression/3.0.0.RELEASE/spring-expression-3.0.0.RELEASE.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/spring-jdbc/3.0.0.RELEASE/spring-jdbc-3.0.0.RELEASE.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/spring-tx/3.0.0.RELEASE/spring-tx-3.0.0.RELEASE.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/springframework/spring-web/3.0.0.RELEASE/spring-web-3.0.0.RELEASE.jar</webClassPathEntry>
         <webClassPathEntry>C:/Users/Nicolas/.m2/repository/org/testng/testng/5.11/testng-5.11-jdk15.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/xerces/xercesImpl/2.8.1/xercesImpl-2.8.1.jar</webClassPathEntry>
+        <webClassPathEntry>C:/Users/Nicolas/.m2/repository/xml-apis/xml-apis/1.3.03/xml-apis-1.3.03.jar</webClassPathEntry>
+        <webClassPathEntry>org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER</webClassPathEntry>
     </webClassPathEntries>
 </tomcatProjectProperties>
