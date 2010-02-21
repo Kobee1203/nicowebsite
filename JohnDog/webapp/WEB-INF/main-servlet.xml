@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+	<bean id="simpleUrlMapping" class = "org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="interceptors">
+				<list>
+					<ref bean="localeChangeInterceptor"/>
+					<ref bean="themeChangeInterceptor"/>
+				</list>
+		</property>
+		<property name="mappings">
+			<props>
+				<prop key="home.html">homeController</prop>
+				<prop key="unsecuredregister.html">registerController</prop>
+				<prop key="captcha.html">captchaController</prop>
+	         </props>
+		</property>
+	</bean>
+	
+<!-- ===========================================================================
+CONTROLLERS
+============================================================================ -->
+	
+	<!--  Controller for the "HOME" page -->
+    <bean id="homeController" class="org.nds.johndog.web.controller.HomeController">
+		<property name="sessionForm"><value>true</value></property>
+        <property name="commandName"><value>form</value></property>
+        <property name="commandClass"><value>org.nds.johndog.web.formbean.HomeForm</value></property>
+        <property name="formView"><value>home</value></property>
+    </bean>
+
+	<!--  Controller for the "Register" page -->
+    <bean id="registerController" class="org.nds.johndog.web.controller.RegisterController">
+		<property name="sessionForm"><value>true</value></property>
+        <property name="commandName"><value>form</value></property>
+        <property name="commandClass"><value>org.nds.johndog.web.formbean.RegisterForm</value></property>
+        <property name="formView"><value>unsecuredregister</value></property>
+        <property name="validator"><ref bean="registerValidator"/></property>
+        <property name="successView"><value>home.html</value></property>
+        
+        <property name="captchaService" ref="captchaService"/>
+        <property name="userManager" ref="userManager"/>
+    </bean>
+
+	<!--  Controller for the "Register" page -->
+    <bean id="captchaController" class="org.nds.security.captcha.CaptchaController">      
+        <property name="captchaService" ref="captchaService"/>
+    </bean>
+
+<!-- ===========================================================================
+VALIDATORS
+============================================================================ -->	
+
+	<bean class="org.nds.johndog.web.validator.RegisterValidator" id="registerValidator">
+		<property name="userManager" ref="userManager"/>
+	</bean>
+
+<!-- ===========================================================================
+TILES CONFIGURATION
+NOTE: 
+==============================================================================-->
+
+	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+		<property name="definitions">
+			<list>
+				<value>/WEB-INF/tiles-layout.xml</value>
+			</list>
+		</property>
+	</bean>
+
+<!-- ===========================================================================
+INTERCEPTORS
+NOTE: 
+==============================================================================-->
+
+	<bean id="localeChangeInterceptor"	class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+	   <property name="paramName"><value>locale</value></property>
+	</bean>
+
+	<bean id="themeChangeInterceptor" class="org.springframework.web.servlet.theme.ThemeChangeInterceptor">
+		<property name="paramName"><value>theme</value></property>
+	</bean>
+	
+<!-- ===========================================================================
+VIEW RESOLVER
+NOTE: 
+==============================================================================-->
+
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
+		<property name="basenames">
+			<list>
+				<value>views</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- LOCALE RESOLVER -->
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/> 
+
+	<!-- THEME RESOLVER -->
+	<bean id="themeResolver" class="org.springframework.web.servlet.theme.CookieThemeResolver">
+		<property name="defaultThemeName" value="theme"/>
+	</bean>
+
+	<!-- MULTIPART RESOLVER -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+		
+	<!-- MESSAGE SOURCE -->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+	    <property name="basenames"><value>messages</value></property>
+	</bean>
+
+</beans>
