@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pageflow:Pageflow xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pageflow="http://www.sybase.com/suade/pageflow" id="pf12339513937870" configfile="/JohnDog/webapp/WEB-INF/faces-config.xml">
+  <nodes xsi:type="pageflow:PFPage" name="j_acegi_security_check" x="122" y="178" id="pf12339551233264" referenceLink="//@navigationRule.0/@navigationCase.0/@toViewId|" path="j_acegi_security_check"/>
+  <nodes xsi:type="pageflow:PFPage" name="login.xhtml" x="122" y="562" id="pf123412629552520" referenceLink="//@navigationRule.0/@fromViewId|" outlinks="pf12343025237241" path="/login.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="j_acegi_security_check" x="122" y="946" id="pf123412629552522" referenceLink="//@navigationRule.0/@navigationCase.0/@toViewId|" path="/j_acegi_security_check.jsp"/>
+  <nodes xsi:type="pageflow:PFPage" name="j_acegi_security_check" x="338" y="562" id="pf12343025237242" referenceLink="//@navigationRule.0/@navigationCase.0/@toViewId|" inlinks="pf12343025237241" path="/j_acegi_security_check"/>
+  <links id="pf12343025237241" target="pf12343025237242" source="pf123412629552520" outcome="login" redirect="true"/>
+</pageflow:Pageflow>

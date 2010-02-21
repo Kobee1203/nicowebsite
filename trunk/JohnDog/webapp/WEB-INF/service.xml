@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+	<!-- ===================== userDetailsService ==================== -->
+	<bean id="userDetailsService" class="org.nds.johndog.web.service.impl.UserDetailsServiceImpl">
+		<property name="userManager">
+			<ref bean="userManager"/>
+		</property>
+		<property name="passwordEncoder" ref="passwordEncoder"/>
+	</bean>
+
+	<bean id="userManagerTarget" class="org.nds.johndog.web.service.impl.UserManagerImpl">
+  		<property name="userDAO">
+  			<ref bean="userDAO" />
+  		</property>
+ 		<property name="rightsDAO">
+  			<ref bean="rightsDAO" />
+  		</property>
+  	</bean>
+  	<bean id="userManager" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager">
+			<ref bean="transactionManager" />
+		</property>
+		<property name="target">
+			<ref local="userManagerTarget" />
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="delete*">PROPAGATION_REQUIRED</prop>
+				<prop key="save*">PROPAGATION_REQUIRED</prop>
+				<prop key="*">PROPAGATION_REQUIRED,readOnly</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="homeServiceTarget" class="org.nds.johndog.web.service.impl.HomeServiceImpl">
+		 <property name="domainDAO">
+  			<ref bean="domainDAO" />
+  		</property>
+		<property name="itemDAO">
+  			<ref bean="itemDAO" />
+  		</property>
+		<property name="itemPropertyDAO">
+  			<ref bean="itemPropertyDAO" />
+  		</property>
+ 		<property name="propertyDAO">
+  			<ref bean="propertyDAO" />
+  		</property>
+ 		<property name="propertyTypeDAO">
+  			<ref bean="propertyTypeDAO" />
+  		</property>
+  		<property name="userDAO">
+  			<ref bean="userDAO" />
+  		</property>
+  	</bean>
+  	<bean id="homeService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager">
+			<ref bean="transactionManager" />
+		</property>
+		<property name="target">
+			<ref local="homeServiceTarget" />
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="delete*">PROPAGATION_REQUIRED</prop>
+				<prop key="save*">PROPAGATION_REQUIRED</prop>
+				<prop key="*">PROPAGATION_REQUIRED,readOnly</prop>
+			</props>
+		</property>
+	</bean>
+	
+</beans>

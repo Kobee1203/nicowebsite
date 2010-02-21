@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC 
+		"-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN" 
+		"http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+		
+<tiles-definitions>
+
+	<definition name=".root" template="/views/jsp/tiles/root.jsp">
+		<put-attribute name="meta" value="/views/jsp/tiles/meta.jsp"/>
+		<put-attribute name="header" value="/views/jsp/tiles/header.jsp"/>
+		<put-attribute name="footer" value="/views/jsp/tiles/footer.jsp"/>
+	</definition>
+	
+	<definition name=".home" extends=".root">
+		<put-attribute name="titleKey" value="home.title"/>
+		<put-attribute name="body" value="/views/jsp/home.jsp"/>
+	</definition>
+
+	<definition name=".unsecuredregister" extends=".root">
+		<put-attribute name="titleKey" value="register.title"/>
+		<put-attribute name="body" value="/views/jsp/register.jsp"/>
+	</definition>
+
+</tiles-definitions>
