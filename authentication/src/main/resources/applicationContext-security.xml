@@ -10,8 +10,15 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 	<global-method-security secured-annotations="enabled">
 	</global-method-security>
  
-    <http auto-config="true">
-        <intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+    <http auto-config="true" access-denied-page="/accessDenied.jsp">
+        <!--intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" /-->
+        <intercept-url pattern="/login.jsp*" filters="none"/>
+        <intercept-url pattern="/admin/*.html" access="ROLE_ADMIN"  />
+        <intercept-url pattern="/**.html" access="ROLE_USER,ROLE_ADMIN" />
+        
+        <form-login login-page="/WEB-INF/jsp/login.jsp" default-target-url="/home.html" authentication-failure-url="/WEB-INF/jsp/login.jsp?login_error=1" />
+        <logout logout-success-url="/WEB-INF/jsp/login.jsp"/>
+        
     </http>
  
     <!--
