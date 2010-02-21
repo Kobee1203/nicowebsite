@@ -6,4 +6,26 @@
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
+    <!-- Bean for i18n -->
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+	   <property name="basenames">
+           <list>
+    	       <value>/WEB-INF/resourcebundle/messages</value>
+            </list>
+        </property>
+    </bean>
+    <!-- End of i18n -->
+    
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView"/>
+    </bean>
+
+    <bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+        <property name="definitions">
+            <list>
+                <value>/WEB-INF/tiles-defs/definitions.xml</value>
+            </list>
+        </property>
+    </bean>
+
 </beans>

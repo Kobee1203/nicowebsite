@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+ <!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN"
+       "http://tiles.apache.org/dtds/tiles-config_2_1.dtd">
+
+<tiles-definitions>
+    <!-- DEFAULT MAIN TEMPLATE -->
+    <definition name="template" template="/WEB-INF/jsp/main.jsp">
+        <put-attribute name="header" value="/WEB-INF/jsp/header.jsp" type="page"/>
+        <put-attribute name="footer" value="/WEB-INF/jsp/footer.jsp" type="page"/>
+    </definition>
+
+    <definition name="index" extends="template">
+        <put-attribute name="content" value="/WEB-INF/jsp/index.jsp" type="page"/>
+        <put-attribute name="newsOne" value="theserverside" type="definition"/>
+        <put-attribute name="newsTwo" value="slashdot" type="definition"/>
+    </definition>
+</tiles-definitions>
