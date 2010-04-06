@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+	<!-- Default Main Template -->
+	<definition name="main" template="/WEB-INF/templates/main.jsp">
+		<put-attribute name="header" value="/WEB-INF/templates/header.jsp" />
+		<put-attribute name="footer" value="/WEB-INF/templates/footer.jsp" />
+		<put-attribute name="menu" value="/WEB-INF/templates/menu.jsp" />
+		<put-attribute name="content" value="/WEB-INF/templates/blank.jsp" />
+	</definition>
+
+    <definition name="login" extends="main">
+        <put-attribute name="content" value="/WEB-INF/jsp/login.jsp"/>
+    </definition>
+
+    <definition name="index" extends="main">
+        <put-attribute name="content" value="/WEB-INF/jsp/index.jsp"/>
+    </definition>
+
+
+    <!-- Person Templates -->
+    <definition name="person/form" extends="main">
+        <put-attribute name="content" value="/WEB-INF/jsp/person/form.jsp"/>
+    </definition>
+    
+    <definition name="person/search" extends="main">
+        <put-attribute name="content" value="/WEB-INF/jsp/person/search.jsp"/>
+    </definition>
+    <!-- End Person Templates -->
+</tiles-definitions>

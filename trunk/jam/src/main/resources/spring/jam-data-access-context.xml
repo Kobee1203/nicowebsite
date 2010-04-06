@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context 
+                           http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/tx
+                           http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:component-scan base-package="org.nds.jam.web.jpa.dao" />
+    
+    <tx:annotation-driven />
+    
+    <context:property-placeholder location="classpath:spring/jam-jdbc-properties.xml"/>
+    
+    <bean id="transactionManager" 
+          class="org.springframework.orm.jpa.JpaTransactionManager"
+          p:entityManagerFactory-ref="entityManagerFactory" />
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        
+        <property name="initialSize" value="10"/>
+        <property name="testOnBorrow" value="true"/>
+    </bean>
+        
+        
+<!--    <bean id="persistenceUnitManager" class="org.nds.spring.orm.jpa.persistenceunit.MergingPersistenceUnitManager">-->
+    <bean id="persistenceUnitManager" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
+        <property name="defaultPersistenceUnitRootLocation" value="classpath*:META-INF/jam-persistence.xml"/>
+        <property name="persistenceXmlLocations">
+            <list>
+                <!--value>classpath*:META-INF/jam-persistence.xml</value-->
+                <value>classpath*:META-INF/persistence.xml</value>
+            </list>
+        </property>
+        <property name="persistenceUnitPostProcessors">
+            <bean class="org.nds.spring.orm.jpa.persistenceunit.MergingPersistenceUnitPostProcessor"/>
+        </property>
+        <property name="dataSources">
+            <map>
+                <entry key="localDataSource" value-ref="dataSource" />
+                <!--<entry key="remoteDataSource" value-ref="remote-db" />-->
+            </map>
+        </property>
+        <!-- if no datasource is specified, use this one -->
+        <property name="defaultDataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="entityManagerFactory" 
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          p:persistenceUnitName="default"
+          p:dataSource-ref="dataSource" 
+          p:persistenceUnitManager-ref="persistenceUnitManager">
+        <property name="persistenceProviderClass" value="org.hibernate.ejb.HibernatePersistence" />
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect"/>
+                <property name="showSql" value="true"/>
+                <!--property name="generateDdl" value="true"/-->
+            </bean>
+        </property>
+    </bean>
+  
+    <bean id="sessionFactory" factory-bean="entityManagerFactory" factory-method="getSessionFactory" />
+    
+    <!-- DAOs -->
+    <bean id="rightsDao" class="org.nds.jam.web.jpa.dao.impl.RightsDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    <bean id="userDao" class="org.nds.jam.web.jpa.dao.impl.UserDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+</beans>

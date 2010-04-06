@@ -1,0 +1,22 @@
+<project name="Sample Project">
+    <bannerLeft>
+        <name>Left Banner</name>
+        <src>images/banner-left.jpg</src>
+        <href>#</href>
+    </bannerLeft>
+
+    <bannerRight>
+        <name>Right Banner</name>
+        <src>images/banner-right.jpg</src>
+        <href>#</href>
+    </bannerRight>
+
+    <body>
+        <menu name="Sample Project">
+            <item name="Introduction" href="index.html" />
+            <item name="Installation" href="installation.html" />
+            <item name="Configuration" href="configuration.html" />
+        </menu>
+        <menu ref="reports" />
+    </body>
+</project>

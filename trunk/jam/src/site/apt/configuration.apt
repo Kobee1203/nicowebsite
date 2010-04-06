@@ -1,0 +1,23 @@
+
+Installation step by step
+
+  [[1]] web.xml
+  
+    * Add context configuration
+    
+%{snippet|id=web-xml|file=src/site/resources/sources.xml}
+
+    * add mapping extension
+    
+%{snippet|id=mapping-web-xml|file=src/site/resources/sources.xml}
+
+  [[2]] In your Database, create 2 tables, USERS and RIGHTS : 
+  
+    * Just declare two classes to persist : 
+    
+%{snippet|id=entities|file=src/site/resources/sources.xml}
+
+    * Run a SQL script
+
+%{snippet|id=sql|file=src/site/resources/sources.xml}
+

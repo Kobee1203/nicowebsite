@@ -1,0 +1,4 @@
+
+Maven dependencies
+
+%{snippet|id=dependencies|file=src/site/resources/sources.xml}
