@@ -29,6 +29,11 @@ public class Rights implements Serializable {
 	public Rights() {
 	}
 
+	public Rights(String role, User user) {
+		this.role = role;
+		this.user = user;
+	}
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	public long getId() {
