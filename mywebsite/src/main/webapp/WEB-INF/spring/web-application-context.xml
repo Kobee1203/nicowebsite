@@ -9,6 +9,8 @@
 
     <context:component-scan base-package="org.springbyexample.web.servlet.mvc" />
 
+    <!--context:property-placeholder location="/WEB-INF/spring/jdbc-properties.xml"/-->
+
     <!-- Imports the configurations of the different infrastructure systems of the application -->
     <import resource="data-access-context.xml" />
     <import resource="webmvc-context.xml" />

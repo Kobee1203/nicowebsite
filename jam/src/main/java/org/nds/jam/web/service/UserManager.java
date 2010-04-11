@@ -5,6 +5,8 @@ import org.nds.jam.web.jpa.bean.User;
 
 public interface UserManager {
 
+	User getUser(Long id);
+
 	User getUser(String username);
 
 	User saveUser(User user);

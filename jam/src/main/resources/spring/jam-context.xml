@@ -10,9 +10,14 @@
                            http://www.springframework.org/schema/context 
                            http://www.springframework.org/schema/context/spring-context.xsd">
 
+    <context:component-scan base-package="org.nds.jam.web.controller" />
+
+    <context:property-placeholder location="classpath:spring/jam-properties.xml"/>
+
     <!-- Imports the configurations of the different infrastructure systems of the application -->
     <import resource="jam-data-access-context.xml" />
     <import resource="jam-security-context.xml" />
     <import resource="jam-webmvc-context.xml" />
+    <import resource="captcha-service.xml" />
 
 </beans>

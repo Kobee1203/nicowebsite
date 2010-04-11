@@ -48,6 +48,11 @@ public class UserManagerImpl implements UserManager, InitializingBean {
 		return null;
 	}
 
+	public User getUser(Long id) {
+		User user = userDao.findById(id, false);
+		return user;
+	}
+
 	public User saveUser(User user) {
 		return userDao.makePersistent(user);
 	}
