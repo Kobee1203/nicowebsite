@@ -112,6 +112,7 @@ public class RegisterController implements InitializingBean {
 		// Validate the captcha
 		if (!CaptchaUtil.validateCaptchaForId(request, captchaService)) {
 			model.addAttribute("captcha_error", "captcha.incorrect.value");
+			return;
 		}
 
 		Set<Rights> rights = new HashSet<Rights>();
@@ -121,6 +122,6 @@ public class RegisterController implements InitializingBean {
 		if (user.getId() == null) {
 			user.setId(result.getId());
 		}
-		model.addAttribute("statusMessageKey", "person.form.msg.success");
+		model.addAttribute("statusMessageKey", "register.form.msg.success");
 	}
 }

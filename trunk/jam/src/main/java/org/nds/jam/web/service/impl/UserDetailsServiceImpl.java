@@ -62,7 +62,7 @@ public class UserDetailsServiceImpl implements Serializable, UserDetailsService 
 	 * @return an UserDetails object representing the authenticated user and his rights
 	 *         if the authentication is successfull.
 	 */
-	public UserDetails loadUserByUsername(String username) {
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, DataAccessException {
 		logger.info("Trying to Load the User with username: " + username + " and password [PROTECTED] from database and LDAP directory");
 		try {
 			logger.info("Searching the user with username: " + username + " in database");
@@ -73,6 +73,10 @@ public class UserDetailsServiceImpl implements Serializable, UserDetailsService 
 				throw new UsernameNotFoundException("user not found in database");
 			}
 			logger.info("user with login: " + username + " found in database");
+
+			if (!user.isEnabled()) {
+				throw new UsernameNotFoundException("The user is not enabled");
+			}
 
 			Set<Rights> rights = user.getRights();
 			List<GrantedAuthority> arrayAuths = new ArrayList<GrantedAuthority>();

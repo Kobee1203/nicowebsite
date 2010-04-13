@@ -40,6 +40,11 @@ public class UserManagerImpl implements UserManager, InitializingBean {
 		userDao.makeTransient(getUser(login));
 	}
 
+	public User getUser(Long id) {
+		User user = userDao.findById(id, false);
+		return user;
+	}
+
 	public User getUser(String username) {
 		List<User> users = userDao.findByExample(new User(username, null));
 		if (users != null && users.size() > 0) {
@@ -48,9 +53,8 @@ public class UserManagerImpl implements UserManager, InitializingBean {
 		return null;
 	}
 
-	public User getUser(Long id) {
-		User user = userDao.findById(id, false);
-		return user;
+	public List<User> getUsers() {
+		return userDao.findAll();
 	}
 
 	public User saveUser(User user) {

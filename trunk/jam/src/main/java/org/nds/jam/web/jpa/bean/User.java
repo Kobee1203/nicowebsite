@@ -35,7 +35,7 @@ public class User implements Serializable {
 	private String username;
 	private String password;
 	private String confirmPassword;
-	private Boolean enabled;
+	private boolean enabled;
 
 	private Set<Rights> rights;
 
@@ -85,11 +85,11 @@ public class User implements Serializable {
 		this.confirmPassword = confirmPassword;
 	}
 
-	public Boolean isEnabled() {
+	public boolean isEnabled() {
 		return enabled;
 	}
 
-	public void setEnabled(Boolean enabled) {
+	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
 

@@ -40,8 +40,10 @@ public abstract class GenericHibernateDAO<T, ID extends Serializable> extends Hi
 		return entity;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<T> findAll() {
-		return findByCriteria();
+		return getSession().createQuery("from " + getPersistentClass().getName()).list();
+		// return findByCriteria();
 	}
 
 	@SuppressWarnings("unchecked")
