@@ -17,6 +17,8 @@
         
         <security:intercept-url pattern="/register*" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         
+        <security:intercept-url pattern="/captcha*" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+        
         <security:intercept-url pattern="/**" access="ROLE_USER" />
 
         <!-- Override default login and logout pages -->

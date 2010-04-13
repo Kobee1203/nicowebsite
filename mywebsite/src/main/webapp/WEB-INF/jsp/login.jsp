@@ -47,6 +47,9 @@
 					<input type="checkbox" name="_spring_security_remember_me" id="remember_me" />
 				</div>
 			</div>
+			<div class="field">
+				<a href="register.html"><fmt:message key="login.register"/></a>
+			</div>
             <div class="form-buttons">
                 <div class="button">
                     <input name="submit" id="submit" type="submit" value="<fmt:message key="button.login"/>" />
