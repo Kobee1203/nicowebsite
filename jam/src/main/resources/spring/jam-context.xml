@@ -19,5 +19,6 @@
     <import resource="jam-security-context.xml" />
     <import resource="jam-webmvc-context.xml" />
     <import resource="captcha-service.xml" />
+    <import resource="mail-service.xml" />
 
 </beans>
