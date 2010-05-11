@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="mailProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="location" value="classpath:META-INF/mail-properties.xml"/>
+    </bean>
+
+    <!-- our Authenticator implementation -->
+    <bean id="smtpAuthenticator" class="org.nds.mail.SmtpAuthenticator">
+        <constructor-arg ref="mailProperties" />
+    </bean>
+    
+    <!-- now setup an authenticated session -->
+    <bean id="mailSession" class="javax.mail.Session" factory-method="getInstance">
+        <constructor-arg ref="mailProperties" />
+        <constructor-arg ref="smtpAuthenticator" />
+    </bean>
+
+    <!-- and configure the MailSender with the authenticated session -->
+    <bean id="mailSender" class="org.nds.mail.MailSender">
+        <constructor-arg ref="mailProperties" />
+        <property name="session" ref="mailSession" />
+    </bean>
+
+    <!-- this is a template message that we can pre-load with default state -->
+    <bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
+        <property name="from"><value><![CDATA[Jam Team <noreply@jam.org>]]></value></property>
+        <property name="subject" value="Validate your registration" />
+        <property name="text">
+        	<value>
+        		<![CDATA[
+        			Dear %s,
+        			Mail Content : %s
+        		]]>
+        	</value>
+        </property>
+    </bean>
+
+    <bean id="mailService" class="org.nds.mail.MailService">
+        <constructor-arg ref="mailSender" />
+        <constructor-arg ref="templateMessage" />
+        <constructor-arg ref="mailProperties" />
+    </bean>
+</beans>
