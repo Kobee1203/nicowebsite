@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.nds.jam.web.jpa.bean.Rights;
 import org.nds.jam.web.jpa.bean.User;
 import org.nds.jam.web.service.UserManager;
+import org.nds.mail.MailService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextException;
@@ -33,17 +34,23 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
 public class RegisterController implements InitializingBean {
 
 	@Autowired
+	UserManager userManager;
+
+	@Autowired
 	ImageCaptchaService captchaService;
 
 	@Autowired
-	UserManager userManager;
+	MailService mailService;
 
 	public void afterPropertiesSet() throws Exception {
+		if (userManager == null) {
+			throw new ApplicationContextException("Must set userManager bean property on " + getClass());
+		}
 		if (captchaService == null) {
 			throw new ApplicationContextException("Must set captchaService bean property on " + getClass());
 		}
-		if (userManager == null) {
-			throw new ApplicationContextException("Must set userManager bean property on " + getClass());
+		if (mailService == null) {
+			throw new ApplicationContextException("Must set mailService bean property on " + getClass());
 		}
 	}
 
@@ -122,6 +129,10 @@ public class RegisterController implements InitializingBean {
 		if (user.getId() == null) {
 			user.setId(result.getId());
 		}
+
+		// Send confirmation mail
+		mailService.sendMail(user.getUsername());
+
 		model.addAttribute("statusMessageKey", "register.form.msg.success");
 	}
 }

@@ -1,14 +1,20 @@
 package org.nds.mail;
 
+import java.io.File;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.nds.common.Util;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.mail.MailException;
+import org.springframework.core.io.Resource;
 import org.springframework.mail.MailParseException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,15 +22,37 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 
 public class MailService {
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	private final JavaMailSender mailSender;
 	private final SimpleMailMessage templateMessage;
+	private final Properties properties;
+
+	private List<Resource> resourceAttachments;
 
 	public MailService(JavaMailSender mailSender, SimpleMailMessage templateMessage) {
-		this.mailSender = mailSender;
-		this.templateMessage = templateMessage;
+		this(mailSender, templateMessage, (String) null);
 	}
 
-	public void sendMail(String to, String dear, String content) {
+	public MailService(JavaMailSender mailSender, SimpleMailMessage templateMessage, String propertiesPath) {
+		this(mailSender, templateMessage, Util.load(propertiesPath, MailConstants.DEFAULT_RESOURCE_PATH));
+	}
+
+	public MailService(JavaMailSender mailSender, SimpleMailMessage templateMessage, Properties props) {
+		this.mailSender = mailSender;
+		this.templateMessage = templateMessage;
+		this.properties = props;
+	}
+
+	public void sendMail(String mail) {
+		sendMail(mail, null, null);
+	}
+
+	public void sendMail(String mail, Properties props) {
+		sendMail(mail, props, null);
+	}
+
+	public void sendMail(String mail, Properties props, List<Resource> attachments) {
 		MimeMessage message = mailSender.createMimeMessage();
 
 		try {
@@ -32,14 +60,33 @@ public class MailService {
 
 			helper.setSentDate(new Date());
 			helper.setFrom(templateMessage.getFrom());
-			helper.setTo(to);
+			helper.setTo(mail);
 			helper.setSubject(templateMessage.getSubject());
-			helper.setText(String.format(templateMessage.getText(), dear, content), String.format(templateMessage.getText(), dear, content));
 
-			FileSystemResource file = new FileSystemResource("C:\\eula.1028.txt");
-			helper.addAttachment(file.getFilename(), file);
-			FileSystemResource file2 = new FileSystemResource("C:\\eula.1031.txt");
-			helper.addAttachment(file2.getFilename(), file2);
+			String content = templateMessage.getText();
+			if (props != null) {
+				for (Map.Entry<Object, Object> entry : props.entrySet()) {
+					content = content.replace("${" + entry.getKey() + "}", (String) entry.getValue());
+				}
+			}
+			if (properties != null) {
+				for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+					content = content.replace("${" + entry.getKey() + "}", (String) entry.getValue());
+				}
+			}
+			helper.setText(content);
+
+			// Attachments
+			if (attachments != null) {
+				for (Resource attachment : attachments) {
+					helper.addAttachment(attachment.getFilename(), attachment);
+				}
+			}
+			if (resourceAttachments != null) {
+				for (Resource attachment : resourceAttachments) {
+					helper.addAttachment(attachment.getFilename(), attachment);
+				}
+			}
 
 		} catch (MessagingException e) {
 			throw new MailParseException(e);
@@ -47,16 +94,16 @@ public class MailService {
 		mailSender.send(message);
 	}
 
-	public void sendMailTo(String email) {
-		SimpleMailMessage msg = new SimpleMailMessage(templateMessage);
-		msg.setSentDate(new Date());
-		msg.setTo(email);
-		msg.setText("This is a test.\nGo Spring!\n");
-		try {
-			this.mailSender.send(msg);
-		} catch (MailException e) {
-			System.err.println("Didn't work.");
-			e.printStackTrace();
+	public void setAttachments(List<Object> attachments) {
+		for (Object obj : attachments) {
+			if (obj instanceof Resource) {
+				resourceAttachments.add((Resource) obj);
+			} else if (obj instanceof File) {
+				Resource resource = Util.getResource((File) obj);
+				resourceAttachments.add(resource);
+			} else {
+				logger.warn("Object type unknown for attachments: " + obj.getClass() + ": " + obj.toString());
+			}
 		}
 	}
 
@@ -64,7 +111,6 @@ public class MailService {
 		ApplicationContext appCtx = new ClassPathXmlApplicationContext(new String[] { "spring/mail-service.xml" });
 
 		MailService mailService = (MailService) appCtx.getBean("mailTest");
-		// mailService.sendMailTo("nicolas.dossantos@gmail.com");
-		mailService.sendMail("nicolas.dossantos@gmail.com", "Nico", "click <a href=\"#\">here</a> to validate your registration.");
+		mailService.sendMail("nicolas.dossantos@gmail.com");
 	}
 }
