@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/itemNew" android:title="@string/app_new" android:icon="@drawable/ic_menu_add"></item>
+    <item android:id="@+id/itemLevel" android:title="@string/level" android:icon="@drawable/ic_menu_preferences"></item>
+    <item android:id="@+id/itemExit" android:title="@string/app_exit" android:icon="@drawable/ic_menu_close_clear_cancel"></item>
+</menu>
