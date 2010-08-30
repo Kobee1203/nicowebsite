@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:background="@color/white">
+    <LinearLayout android:id="@+id/LayoutMain" android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent"
+        android:gravity="center_horizontal" android:background="@drawable/back">
+        <!--    android:background="@drawable/background">-->
+        <LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent">
+            <TextView android:layout_width="fill_parent" android:layout_height="wrap_content" android:textSize="20px" android:textStyle="bold"
+                android:gravity="center_horizontal" android:text="@string/app_name" android:textColor="@color/green" />
+        </LinearLayout>
+
+        <TableLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:stretchColumns="0" android:layout_marginLeft="5px" android:layout_marginRight="5px">
+            <TableRow android:layout_width="wrap_content" android:layout_height="wrap_content">
+                <TableLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:stretchColumns="*">
+                    <TableRow android:layout_width="wrap_content" android:layout_height="wrap_content">
+                        <LinearLayout android:padding="6px" android:layout_height="fill_parent" android:layout_width="wrap_content"
+                            android:orientation="vertical" android:background="@drawable/back_infos" android:layout_marginBottom="2px">
+                            <TableLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
+                                <TableRow android:layout_height="wrap_content" android:layout_width="fill_parent">
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold" android:textColor="@color/black" android:text="@string/level_info"></TextView>
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/black" android:id="@+id/LevelInfo"></TextView>
+                                </TableRow><TableRow android:layout_width="wrap_content" android:layout_height="wrap_content">
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold" android:textColor="@color/black" android:text="@string/score_info"></TextView>
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/black" android:id="@+id/ScoreInfo"></TextView>
+                                </TableRow>
+                                <TableRow android:layout_width="wrap_content" android:layout_height="wrap_content">
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold"
+                                        android:textColor="@color/black" android:text="@string/total_score_info"></TextView>
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/black" android:id="@+id/TotalScoreInfo"></TextView>
+                                </TableRow>
+                            </TableLayout>
+                        </LinearLayout>
+                    </TableRow>
+                    <TableRow android:layout_width="wrap_content" android:layout_height="wrap_content">
+                        <LinearLayout android:background="@drawable/back_letters" android:padding="6px" android:layout_height="fill_parent"
+                            android:layout_width="wrap_content" android:orientation="vertical">
+                            <TextView android:layout_height="wrap_content" android:width="100px" android:textStyle="bold" android:textColor="@color/black"
+                                android:id="@+id/LettersPressed" android:layout_width="fill_parent"></TextView>
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+    
+                <LinearLayout android:background="@drawable/back_hangman" android:layout_width="wrap_content" android:padding="10px"
+                    android:layout_height="fill_parent" android:layout_marginLeft="10px">
+                    <ImageView android:layout_height="fill_parent" android:layout_width="fill_parent" android:src="@drawable/hang0"
+                        android:scaleType="fitXY" android:id="@+id/ImageViewHangman"></ImageView>
+                </LinearLayout>
+            </TableRow>
+        </TableLayout>
+
+        <LinearLayout android:layout_height="wrap_content" android:gravity="center_vertical|center_horizontal" android:minWidth="200px"
+            android:layout_width="fill_parent" android:focusable="false" android:minHeight="40px" android:id="@+id/SecretWord">
+        </LinearLayout>
+
+        <LinearLayout android:layout_height="wrap_content" android:id="@+id/KeyboardLayout"
+            android:orientation="vertical" android:visibility="visible" android:layout_marginLeft="2px" android:layout_marginRight="2px" android:gravity="center" android:layout_width="fill_parent">
+            <TableLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:stretchColumns="*">
+                <TableRow android:layout_width="wrap_content" android:layout_height="wrap_content">
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold"
+                        android:textColor="@color/green" android:onClick="clickLetter" android:text="A" android:saveEnabled="true"
+                        android:background="@drawable/button_background"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold"
+                        android:textColor="@color/green" android:onClick="clickLetter" android:text="B" android:saveEnabled="true"
+                        android:background="@drawable/button_background"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="C" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="D" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="E" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="F" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="G" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="H" android:saveEnabled="true"></Button>
+                </TableRow>
+                <TableRow android:layout_width="wrap_content" android:layout_height="wrap_content">
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="I" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="J" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="K" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="L" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="M" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="N" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="O" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="P" android:saveEnabled="true"></Button>
+                </TableRow>
+                <TableRow android:layout_width="wrap_content" android:layout_height="wrap_content">
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="Q" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="R" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="S" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="T" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="U" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="V" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="W" android:saveEnabled="true"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="X" android:saveEnabled="true"></Button>
+                </TableRow>
+            </TableLayout>
+            <TableLayout android:layout_height="wrap_content" android:stretchColumns="0,3" android:layout_width="wrap_content">
+                <TableRow android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center_horizontal">
+                    <Button android:id="@+id/ButtonNew" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:onClick="newWord" android:textColor="@color/green" android:textStyle="bold" android:background="@drawable/button_menu_background"
+                        android:text="@string/app_new" android:layout_gravity="left"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="Y" android:saveEnabled="true"
+                        android:layout_gravity="center_horizontal"></Button>
+                    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/button_background"
+                        android:textStyle="bold" android:textColor="@color/green" android:onClick="clickLetter" android:text="Z" android:saveEnabled="true"
+                        android:layout_gravity="center_horizontal"></Button>
+                    <Button android:layout_height="wrap_content" android:id="@+id/ButtonExit" android:onClick="exit" android:textStyle="bold"
+                        android:textColor="@color/green" android:background="@drawable/button_menu_background" android:text="@string/app_exit"
+                        android:layout_width="wrap_content" android:layout_gravity="right"></Button>
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+        <LinearLayout android:layout_width="fill_parent" android:gravity="center" android:layout_height="wrap_content" android:padding="20px"
+            android:visibility="gone" android:id="@+id/LayoutResult">
+            <TextView android:layout_height="wrap_content" android:id="@+id/TextViewResult" android:textStyle="bold" android:textSize="24px"
+                android:layout_width="wrap_content"></TextView>
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</ScrollView>

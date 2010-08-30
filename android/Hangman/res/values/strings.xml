@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="total_score_info">Total: </string>
+    <string name="score_info">Score: </string>
+    <string name="level_info">Level: </string>
+    <string name="level">Level</string>
+    <string name="hello">Hello World, Hangman!</string>
+    <string name="app_name">Hangman game</string>
+    <string name="app_exit">Exit</string>
+    <string name="app_new">New</string>
+    <color name="green">#00FF00</color>
+    <color name="red">#FF0000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="grey">#DDDDDD</color>
+    <color name="black">#000000</color>
+    <string-array name="level">
+        <item>Easy</item>
+        <item>Middle</item>
+        <item>Difficult</item>
+        <item>Tremulous</item>
+    </string-array>
+<string name="win">Congratulation ! </string>
+<string name="lose">You lose !</string>
+</resources>
