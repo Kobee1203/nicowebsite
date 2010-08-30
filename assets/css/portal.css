@@ -3,6 +3,10 @@
 	width: 840px;
 	border: 1px solid;
 	margin: 0 auto 0 auto;
+	padding: 5px;
+	
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
 }
 
 /* all columns */
