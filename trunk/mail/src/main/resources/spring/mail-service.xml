@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="mailProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="location" value="classpath:META-INF/mail-properties.xml"/>
+    </bean>
+
+    <!-- our Authenticator implementation -->
+    <bean id="smtpAuthenticator" class="org.nds.mail.SmtpAuthenticator">
+        <constructor-arg ref="mailProperties" />
+    </bean>
+    
+    <!-- now setup an authenticated session -->
+    <bean id="mailSession" class="javax.mail.Session" factory-method="getInstance">
+        <constructor-arg ref="mailProperties" />
+        <constructor-arg ref="smtpAuthenticator" />
+    </bean>
+
+    <!-- and configure the MailSender with the authenticated session -->
+    <bean id="mailSender" class="org.nds.mail.MailSender">
+        <constructor-arg ref="mailProperties" />
+        <property name="session" ref="mailSession" />
+    </bean>
+
+</beans>
