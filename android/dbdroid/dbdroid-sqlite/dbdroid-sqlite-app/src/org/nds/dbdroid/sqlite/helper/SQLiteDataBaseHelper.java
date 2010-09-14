@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.azeckoski.reflectutils.ReflectUtils;
-import org.nds.dbdroid.helper.DataBaseHelper;
+import org.nds.dbdroid.DataBaseManager;
 import org.nds.dbdroid.helper.EntityHelper;
 import org.nds.dbdroid.helper.Field;
 
@@ -19,13 +19,13 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-public class SQLiteDataBaseHelper implements DataBaseHelper {
+public class SQLiteDataBaseHelper extends DataBaseManager {
 
 	private final String TAG = getClass().toString();
 	
 	private SQLiteHelper sqliteHelper;
 	
-	public SQLiteDataBaseHelper(Context context, String name, CursorFactory factory, int version) {
+	public SQLiteDataBaseHelper(Context context, String name, CursorFactory factory, int version) { 
 		sqliteHelper = new SQLiteHelper(context, name, factory, version);
 	}
 	
@@ -99,17 +99,18 @@ public class SQLiteDataBaseHelper implements DataBaseHelper {
 		}	
 	}
 
-
+	@Override
 	public void open() {
 		sqliteHelper.open();
 	}
 
-
+	@Override
 	public void close() {
 		sqliteHelper.close();
 	}
 
-
+	
+	@Override
 	public void delete(Object entity) {
 		String tableName = EntityHelper.getTableName(entity.getClass());
 		Field idField = EntityHelper.getIdField(entity);	
@@ -118,7 +119,7 @@ public class SQLiteDataBaseHelper implements DataBaseHelper {
 		sqliteHelper.getDatabase().delete(tableName, columnName + " = ?", new String[]{(String)idField.getFieldValue()});
 	}
 
-
+	@Override
 	public <T> List<T> findAll(Class<T> entityClazz) {
 		List<T> entities = null;
 
@@ -137,11 +138,13 @@ public class SQLiteDataBaseHelper implements DataBaseHelper {
 		return entities;
 	}
 
+	@Override
 	public <T> T findById(String id, Class<T> entityClazz) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public <T> T saveOrUpdate(T entity) {
 		// TODO Auto-generated method stub
 		return null;

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dbdroid>
+	<entities>
+		<entity class="org.nds.dbdroid.sqlite.test.entity.Test"/>
+	</entities>
+
+</dbdroid>

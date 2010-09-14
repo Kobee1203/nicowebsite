@@ -4,8 +4,9 @@ package org.nds.dbdroid.sqlite.test;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.nds.dbdroid.helper.DataBaseHelper;
+import org.nds.dbdroid.DataBaseManager;
 import org.nds.dbdroid.sqlite.helper.SQLiteDataBaseHelper;
+import org.nds.dbdroid.sqlite.test.dao.TestDao;
 
 import junit.framework.Assert;
 import android.test.AndroidTestCase;
@@ -23,12 +24,18 @@ public class SomeTest extends AndroidTestCase {
     }
     
     public void testContext() throws IOException {
-    	String[] array = getContext().getAssets().list("/assets");
+    	/*String[] array = getContext().getAssets().list("/assets");
     	Log.d(getClass().getName(), array.toString());
     	InputStream is = getContext().getAssets().open("test");
-    	Assert.assertNotNull(is);
+    	Assert.assertNotNull(is);*/
     	
-    	DataBaseHelper dbHelper = new SQLiteDataBaseHelper(getContext(), "test", null, 1);
+    	DataBaseManager dbHelper = new SQLiteDataBaseHelper(getContext(), "test", null, 1);
     	dbHelper.open();
+    	
+    	TestDao testDao = dbHelper.getDAO(TestDao.class);
+    	
+    	testDao.findAll();
+    	
+    	dbHelper.close();
     }
 }
