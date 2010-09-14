@@ -94,6 +94,11 @@ public abstract class DataBaseManager {
 			switch (PropertyKey.getValueOf(key)) {
 			case GENERATE_DB:
 				log.info("-- generate DB --");
+				for(Map.Entry<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> e : daos.entrySet()) {
+					Class<? extends AndroidDAO<?>>  daoClass = e.getKey();
+					AndroidDAO<?> dao = e.getValue();
+					log.info("daoClass: "+daoClass.getSuperclass().getTypeParameters()[0].getClass().getName());
+				}
 				break;
 			case SHOW_SQL:
 				log.info("-- show SQL --");
