@@ -4,14 +4,14 @@ import org.nds.dbdroid.annotation.Entity;
 import org.nds.dbdroid.annotation.Id;
 
 @Entity
-public class Test {
+public class Entity3 {
 	
 	@Id
 	private Integer _id;
 	
 	private String name;
 	
-	public Test(String name) {
+	public Entity3(String name) {
 		this.name = name;
 	}
 	

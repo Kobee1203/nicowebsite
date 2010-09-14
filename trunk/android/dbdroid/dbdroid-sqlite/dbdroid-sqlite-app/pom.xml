@@ -53,7 +53,7 @@
             <plugin>
                 <groupId>com.jayway.maven.plugins.android.generation2</groupId>
                 <artifactId>maven-android-plugin</artifactId>
-                <executions>
+                <!--executions>
                     <execution>
                         <id>startemulator</id>
                         <phase>initialize</phase>
@@ -61,7 +61,7 @@
                             <goal>emulator-start</goal>
                         </goals>
                     </execution>
-                </executions>
+                </executions-->
             </plugin>
         </plugins>
     </build>
