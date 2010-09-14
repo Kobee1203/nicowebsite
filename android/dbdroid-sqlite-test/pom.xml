@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>dbdroid-sqlite-test</groupId>
+  <artifactId>dbdroid-sqlite-test</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>apk</packaging>
+  
+  <dependencies>
+		<dependency>
+			<groupId>org.nds.dbdroid</groupId>
+			<artifactId>dbdroid-sqlite</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>apk</type>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+<!--		<testSourceDirectory>src</testSourceDirectory>-->
+
+		<finalName>${project.artifactId}</finalName>
+
+		<plugins>
+			<plugin>
+				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+				<artifactId>maven-android-plugin</artifactId>
+				<version>2.5.0</version>
+				<configuration>
+					<sdk>
+						<platform>2.1</platform>
+					</sdk>
+					<emulator>
+						<avd>my_avd</avd>
+					</emulator>
+					<deleteConflictingFiles>true</deleteConflictingFiles>
+					<undeployBeforeDeploy>true</undeployBeforeDeploy>
+				</configuration>
+				<extensions>true</extensions>
+				<!--
+					executions> <execution> <id>startemulator</id>
+					<phase>initialize</phase> <goals> <goal>emulator-start</goal>
+					</goals> </execution> </executions
+				-->
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
