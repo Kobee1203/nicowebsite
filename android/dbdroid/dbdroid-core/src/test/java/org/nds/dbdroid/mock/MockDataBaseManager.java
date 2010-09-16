@@ -3,48 +3,68 @@ package org.nds.dbdroid.mock;
 import java.io.InputStream;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.nds.dbdroid.DataBaseManager;
 import org.nds.dbdroid.exception.DBDroidException;
+import org.nds.dbdroid.helper.Field;
 
 public class MockDataBaseManager extends DataBaseManager {
 
+    private static final Log log = LogFactory.getLog(MockDataBaseManager.class);
+    
 	public MockDataBaseManager(InputStream config) throws DBDroidException {
 		super(config);
 	}
 
 	@Override
 	public void open() {
-		// TODO Auto-generated method stub
-
+	    log.debug("## open");
 	}
 
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
-
+	    log.debug("## close");
 	}
+	
+    @Override
+    protected void createTable(String tableName, List<Field> fields) {
+        log.debug("## create table " + tableName + " " + fields);
+    }
+
+    @Override
+    protected void updateTable(String tableName, List<Field> fields) {
+        log.debug("## update table " + tableName + " " + fields);
+    }
+
+    @Override
+    protected void resetTable(String tableName, List<Field> fields) {
+        log.debug("## reset table " + tableName + " " + fields);
+    }
 
 	@Override
 	public void delete(Object entity) {
-		// TODO Auto-generated method stub
-
+	    log.debug("## delete " + entity);
 	}
 
 	@Override
 	public <E> List<E> findAll(Class<E> entityClass) {
-		// TODO Auto-generated method stub
+	    log.debug("## find all (" + entityClass + ")");
+	    
 		return null;
 	}
 
 	@Override
 	public <E> E findById(String id, Class<E> entityClazz) {
-		// TODO Auto-generated method stub
+	    log.debug("## find by id " + id);
+	    
 		return null;
 	}
 
 	@Override
 	public <E> E saveOrUpdate(E entity) {
-		// TODO Auto-generated method stub
+	    log.debug("## save or update (" + entity + ")");
+	    
 		return null;
 	}
 

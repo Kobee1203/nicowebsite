@@ -1,37 +1,53 @@
 package org.nds.dbdroid.helper;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.azeckoski.reflectutils.ClassFields;
 import org.azeckoski.reflectutils.ReflectUtils;
 import org.nds.dbdroid.annotation.Column;
 import org.nds.dbdroid.annotation.Entity;
 import org.nds.dbdroid.annotation.Id;
 
-import android.util.Log;
-
 public final class EntityHelper {
 
-	private static final String TAG = EntityHelper.class.toString();
+    private static final Log log = LogFactory.getLog(EntityHelper.class);
 	
 	private EntityHelper() {
 	}
 	
-	public static String getTableName(Class<?> entityClazz) {
+	public static String getTableName(Class<?> entityClass) {
 		// Analyze class
-		ClassFields<?> cf = ReflectUtils.getInstance().analyzeClass(entityClazz);
+		ClassFields<?> cf = ReflectUtils.getInstance().analyzeClass(entityClass);
 		Entity entity = cf.getClassAnnotation(Entity.class);
 		String tableName = entity.name();
 		if(tableName == null) {
-			throw new IllegalArgumentException("Table name is NULL for Entity " + entityClazz.getClass().getCanonicalName());
+			throw new IllegalArgumentException("Table name is NULL for Entity " + entityClass.getClass().getCanonicalName());
 		} else if("".equals(tableName)) {
-			tableName = entityClazz.getName().toLowerCase();
-			Log.d(TAG, "Table name is empty -> Define table with lowercase Entity class name: " + tableName);
+			tableName = entityClass.getName().toLowerCase();
+			log.debug("Table name is empty -> Define table with lowercase Entity class name: " + tableName);
 		}
 		
 		return tableName;
+	}
+	
+	public static List<Field> getFields(Class<?> entityClass) {
+		List<Field> fields = new ArrayList<Field>();
+		// Analyze class
+		ClassFields<?> cf = ReflectUtils.getInstance().analyzeClass(entityClass);
+		for(String fieldName : cf.getFieldNames()) {
+			Class<?> fieldType = cf.getFieldType(fieldName);
+			if(fieldType != null) {
+				Field field = new Field(fieldName, null, cf.getFieldAnnotations(fieldName), fieldType);
+				fields.add(field);
+			}
+		}
+		
+		return fields;
 	}
 	
 	public static Field getIdField(Object entity) {
@@ -124,4 +140,5 @@ public final class EntityHelper {
 		
 		return columnName;
 	}
+	
 }

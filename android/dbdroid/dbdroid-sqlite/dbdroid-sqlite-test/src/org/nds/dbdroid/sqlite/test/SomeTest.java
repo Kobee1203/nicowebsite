@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.nds.dbdroid.DataBaseManager;
+import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.sqlite.helper.SQLiteDataBaseHelper;
 import org.nds.dbdroid.sqlite.test.dao.TestDao;
 
@@ -23,7 +24,7 @@ public class SomeTest extends AndroidTestCase {
        Assert.assertTrue(1 + 1 == 3);
     }
     
-    public void testContext() throws IOException {
+    public void testContext() throws IOException, DBDroidException {
     	/*String[] array = getContext().getAssets().list("/assets");
     	Log.d(getClass().getName(), array.toString());
     	InputStream is = getContext().getAssets().open("test");

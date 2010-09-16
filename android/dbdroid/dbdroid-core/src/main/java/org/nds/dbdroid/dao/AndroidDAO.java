@@ -3,13 +3,13 @@ package org.nds.dbdroid.dao;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.nds.dbdroid.DataBaseManager;
-
-import android.util.Log;
 
 public class AndroidDAO<T> implements GenericDAO<T, String> {
 
-	private static final String TAG = AndroidDAO.class.getName();
+    private static final Log log = LogFactory.getLog(AndroidDAO.class);
 	
 	protected DataBaseManager dbManager;
 	
@@ -21,23 +21,27 @@ public class AndroidDAO<T> implements GenericDAO<T, String> {
 		this.entityClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 	}
 	
+	public final Class<T> getEntityClass() {
+		return entityClass;
+	}
+	
 	public void delete(T entity) {
-		Log.d(TAG, "Delete Entity");
+	    log.debug("Delete Entity");
 		this.dbManager.delete(entity);
 	}
 
 	public List<T> findAll() {
-		Log.d(TAG, "Find all Entities");
+		log.debug("Find all Entities");
 		return (List<T>) this.dbManager.findAll(entityClass);
 	}
 
 	public T findById(String id) {
-		Log.d(TAG, "Find Entity by Id: " + id);
+		log.debug("Find Entity by Id: " + id);
 		return (T) this.dbManager.findById(id, entityClass);
 	}
 
 	public T saveOrUpdate(T entity) {
-		Log.d(TAG, "Save or Update Entity");
+		log.debug("Save or Update Entity");
 		return (T) this.dbManager.saveOrUpdate(entity);
 	}
 
