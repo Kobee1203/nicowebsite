@@ -1,6 +1,8 @@
 package org.nds.dbdroid;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -16,117 +18,240 @@ import org.nds.dbdroid.config.ConfigXMLErrorHandler;
 import org.nds.dbdroid.config.ConfigXMLHandler;
 import org.nds.dbdroid.dao.AndroidDAO;
 import org.nds.dbdroid.exception.DBDroidException;
+import org.nds.dbdroid.helper.EntityHelper;
+import org.nds.dbdroid.helper.Field;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.XMLReader;
 
 public abstract class DataBaseManager {
 
-	private static final Log log = LogFactory.getLog(DataBaseManager.class);
+    private static final Log log = LogFactory.getLog(DataBaseManager.class);
 
-	private static final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
-	private static final String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
-	private static final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
+    private static final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
+    private static final String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
+    private static final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
 
-	private enum PropertyKey {
-		GENERATE_DB("dbdroid.generate"), 
-		SHOW_SQL("dbdroid.show_sql");
+    private static final String CLASSPATH_PREFIX = "classpath:";
 
-		private String key;
+    private static final String CREATE_VALUE = "create";
+    private static final String UPDATE_VALUE = "update";
+    private static final String RESET_VALUE = "reset";
 
-		private PropertyKey(String key) {
-			this.key = key;
-		}
+    private enum PropertyKey {
+        GENERATE_DB("dbdroid.generate"),
+        SHOW_QUERY("dbdroid.show_query"),
+        CREATING_SCRIPT("dbdroid.creating_script"),
+        UPDATING_SCRIPT("dbdroid.updating_script"),
+        RESETING_SCRIPT("dbdroid.reseting_script");
 
-		public static PropertyKey getValueOf(String key) {
-			for (PropertyKey propertyKey : values()) {
-				if (key.equals(propertyKey.key)) {
-					return propertyKey;
-				}
-			}
-			return null;
-		}
-	}
+        private String key;
 
-	private Properties properties;
-	private Map<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> daos = new HashMap<Class<? extends AndroidDAO<?>>, AndroidDAO<?>>();
+        private PropertyKey(String key) {
+            this.key = key;
+        }
 
-	public DataBaseManager(InputStream config) throws DBDroidException {
-		loadConfig(config);
-	}
+        public static PropertyKey getValueOf(String key) {
+            for (PropertyKey propertyKey : values()) {
+                if (key.equals(propertyKey.key)) {
+                    return propertyKey;
+                }
+            }
+            return null;
+        }
 
-	private void loadConfig(InputStream config) throws DBDroidException {
-		try {
-			/** Handling XML */
-			SAXParserFactory spf = SAXParserFactory.newInstance();
-			spf.setNamespaceAware(true);
-			spf.setValidating(true);
-			SAXParser sp = spf.newSAXParser();
-			try {
-				sp.setProperty(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
-				sp.setProperty(JAXP_SCHEMA_SOURCE, new File(getClass().getResource("/xsd/dbdroid.xsd").toURI()));
-			} catch (SAXNotRecognizedException x) {
-				// Happens if the parser does not support JAXP 1.2
-				log.debug("parser does not support JAXP 1.2");
-			}
-			XMLReader xr = sp.getXMLReader();
+        @Override
+        public String toString() {
+            return this.key;
+        }
+    }
 
-			/** Create handler to handle XML Tags ( extends DefaultHandler ) */
-			ConfigXMLHandler configXMLHandler = new ConfigXMLHandler(this);
-			xr.setErrorHandler(new ConfigXMLErrorHandler());
-			xr.setContentHandler(configXMLHandler);
-			xr.parse(new InputSource(config));
+    private Properties properties;
+    private Map<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> daos = new HashMap<Class<? extends AndroidDAO<?>>, AndroidDAO<?>>();
 
-			daos = configXMLHandler.getDaos();
-			properties = configXMLHandler.getProperties();
-		} catch (Exception e) {
-			throw new DBDroidException("XML Pasing Exception = " + e, e);
-		}
+    public DataBaseManager(InputStream config) throws DBDroidException {
+        if (config != null) {
+            loadConfig(config);
+        } else {
+            log.warn("XML dbdroid configuration not found." + (config == null ? "Config inputStream object is NULL." : ""));
+        }
+    }
 
-		processProperties();
-	}
+    private void loadConfig(InputStream config) throws DBDroidException {
+        try {
+            /** Handling XML */
+            SAXParserFactory spf = SAXParserFactory.newInstance();
+            spf.setNamespaceAware(true);
+            spf.setValidating(true);
+            SAXParser sp = spf.newSAXParser();
+            try {
+                sp.setProperty(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
+                sp.setProperty(JAXP_SCHEMA_SOURCE, new File(getClass().getResource("/xsd/dbdroid.xsd").toURI()));
+            } catch (SAXNotRecognizedException x) {
+                // Happens if the parser does not support JAXP 1.2
+                log.debug("parser does not support JAXP 1.2");
+            }
+            XMLReader xr = sp.getXMLReader();
 
-	private void processProperties() {
-		for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-			String key = (String) entry.getKey();
-			String value = (String) entry.getValue();
+            /** Create handler to handle XML Tags ( extends DefaultHandler ) */
+            ConfigXMLHandler configXMLHandler = new ConfigXMLHandler(this);
+            xr.setErrorHandler(new ConfigXMLErrorHandler());
+            xr.setContentHandler(configXMLHandler);
+            xr.parse(new InputSource(config));
 
-			switch (PropertyKey.getValueOf(key)) {
-			case GENERATE_DB:
-				log.info("-- generate DB --");
-				for(Map.Entry<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> e : daos.entrySet()) {
-					Class<? extends AndroidDAO<?>>  daoClass = e.getKey();
-					AndroidDAO<?> dao = e.getValue();
-					log.info("daoClass: "+daoClass.getSuperclass().getTypeParameters()[0].getClass().getName());
-				}
-				break;
-			case SHOW_SQL:
-				log.info("-- show SQL --");
-				break;
-			default:
-				log.error("Unknown property key: " + key + " (value: " + value + ")");
-			}
-		}
-	}
+            daos = configXMLHandler.getDaos();
+            properties = configXMLHandler.getProperties();
+        } catch (Exception e) {
+            throw new DBDroidException("XML Pasing Exception = " + e, e);
+        }
 
-	public <T extends AndroidDAO<?>> T getDAO(Class<T> daoClass) {
-		T dao = (T) daos.get(daoClass);
-		if (dao == null) {
-			throw new NullPointerException("DAO class '" + daoClass + "' not found. Verify the XML dbdroid configuration.");
-		}
-		return dao;
-	}
+        processProperties();
+    }
 
-	public abstract void open();
+    private void processProperties() throws DBDroidException {
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            String key = (String) entry.getKey();
+            String value = (String) entry.getValue();
 
-	public abstract void close();
+            PropertyKey propertyKey = PropertyKey.getValueOf(key);
+            if (propertyKey != null) {
+                switch (propertyKey) {
+                    case GENERATE_DB:
+                        log.debug("-- generate DB --");
+                        if (CREATE_VALUE.equalsIgnoreCase(value)) {
+                            onCreate();
+                        } else if (UPDATE_VALUE.equalsIgnoreCase(value)) {
+                            onUpdate();
+                        } else if (RESET_VALUE.equalsIgnoreCase(value)) {
+                            onReset();
+                        }
+                        break;
+                    case CREATING_SCRIPT:
+                        log.debug("-- creating script --");
+                        break;
+                    case UPDATING_SCRIPT:
+                        log.debug("-- updating script --");
+                        break;
+                    case RESETING_SCRIPT:
+                        log.debug("-- reseting script --");
+                        break;
+                    case SHOW_QUERY:
+                        log.debug("-- show query --");
+                        break;
+                    default:
+                        log.info("Property key: " + key + " (value: " + value + ")");
+                }
+            } else {
+                log.warn("Unknown property key: " + key);
+            }
+        }
+    }
 
-	public abstract void delete(Object entity);
+    public <T extends AndroidDAO<?>> T getDAO(Class<T> daoClass) {
+        T dao = (T) daos.get(daoClass);
+        if (dao == null) {
+            throw new NullPointerException("DAO class '" + daoClass + "' not found. Verify the XML dbdroid configuration.");
+        }
+        return dao;
+    }
 
-	public abstract <E> List<E> findAll(Class<E> entityClass);
+    private void onCreate() throws DBDroidException {
+        try {
+            String script = getScriptContent(properties.getProperty(PropertyKey.CREATING_SCRIPT.toString()));
+            createDataBase(script);
 
-	public abstract <E> E findById(String id, Class<E> entityClazz);
+            for (Map.Entry<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> e : daos.entrySet()) {
+                AndroidDAO<?> dao = e.getValue();
+                Class<?> entityClass = dao.getEntityClass();
+                log.debug("entityClass: " + entityClass);
+                String tableName = EntityHelper.getTableName(entityClass);
+                log.debug("Table name: " + EntityHelper.getTableName(entityClass));
+                List<Field> fields = EntityHelper.getFields(entityClass);
+                log.debug("fields: " + fields);
+                createTable(tableName, fields);
+            }
+        } catch (Exception e) {
+            throw new DBDroidException(e.getMessage(), e);
+        }
+    }
 
-	public abstract <E> E saveOrUpdate(E entity);
+    private void onUpdate() throws DBDroidException {
+        try {
+            String script = getScriptContent(properties.getProperty(PropertyKey.UPDATING_SCRIPT.toString()));
+            updateDataBase(script);
+
+            for (Map.Entry<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> e : daos.entrySet()) {
+                AndroidDAO<?> dao = e.getValue();
+                Class<?> entityClass = dao.getEntityClass();
+                log.debug("entityClass: " + entityClass);
+                String tableName = EntityHelper.getTableName(entityClass);
+                log.debug("Table name: " + EntityHelper.getTableName(entityClass));
+                List<Field> fields = EntityHelper.getFields(entityClass);
+                log.debug("fields: " + fields);
+                updateTable(tableName, fields);
+            }
+        } catch (Exception e) {
+            throw new DBDroidException(e.getMessage(), e);
+        }
+    }
+
+    private void onReset() throws DBDroidException {
+        try {
+            String script = getScriptContent(properties.getProperty(PropertyKey.RESETING_SCRIPT.toString()));
+            resetDataBase(script);
+
+            for (Map.Entry<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> e : daos.entrySet()) {
+                AndroidDAO<?> dao = e.getValue();
+                Class<?> entityClass = dao.getEntityClass();
+                log.debug("entityClass: " + entityClass);
+                String tableName = EntityHelper.getTableName(entityClass);
+                log.debug("Table name: " + EntityHelper.getTableName(entityClass));
+                List<Field> fields = EntityHelper.getFields(entityClass);
+                log.debug("fields: " + fields);
+                resetTable(tableName, fields);
+            }
+        } catch (Exception e) {
+            throw new DBDroidException(e.getMessage(), e);
+        }
+    }
+
+    private String getScriptContent(String value) throws FileNotFoundException {
+        if (value != null) {
+            InputStream is = null;
+            if (value.startsWith(CLASSPATH_PREFIX)) {
+                is = getClass().getResourceAsStream(value.substring(value.indexOf(CLASSPATH_PREFIX) + (CLASSPATH_PREFIX.length() + 1)));
+            } else {
+                is = new FileInputStream(new File(value));
+            }
+        }
+        return null;
+    }
+
+    protected void createDataBase(String script) {
+    }
+
+    protected void updateDataBase(String script) {
+    }
+
+    protected void resetDataBase(String script) {
+    }
+
+    public abstract void open();
+
+    public abstract void close();
+
+    protected abstract void createTable(String tableName, List<Field> fields);
+
+    protected abstract void updateTable(String tableName, List<Field> fields);
+
+    protected abstract void resetTable(String tableName, List<Field> fields);
+
+    public abstract void delete(Object entity);
+
+    public abstract <E> List<E> findAll(Class<E> entityClass);
+
+    public abstract <E> E findById(String id, Class<E> entityClazz);
+
+    public abstract <E> E saveOrUpdate(E entity);
 
 }

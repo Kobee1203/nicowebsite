@@ -8,7 +8,7 @@
 	<dbdroid:dao package="org.nds.dbdroid.dao" />
 
 	<dbdroid:properties>
-		<dbdroid:property name="dbdroid.show_sql" value="true" />
+		<dbdroid:property name="dbdroid.show_query" value="true" />
 		<dbdroid:property name="dbdroid.generate">update</dbdroid:property>
 	</dbdroid:properties>
 </dbdroid:dbdroid-configuration>

@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.azeckoski.reflectutils.ReflectUtils;
 import org.nds.dbdroid.DataBaseManager;
+import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.helper.EntityHelper;
 import org.nds.dbdroid.helper.Field;
 
@@ -25,7 +26,8 @@ public class SQLiteDataBaseHelper extends DataBaseManager {
 	
 	private SQLiteHelper sqliteHelper;
 	
-	public SQLiteDataBaseHelper(Context context, String name, CursorFactory factory, int version) { 
+	public SQLiteDataBaseHelper(Context context, String name, CursorFactory factory, int version) throws DBDroidException { 
+	    super(null);
 		sqliteHelper = new SQLiteHelper(context, name, factory, version);
 	}
 	
@@ -109,6 +111,23 @@ public class SQLiteDataBaseHelper extends DataBaseManager {
 		sqliteHelper.close();
 	}
 
+    @Override
+    protected void createTable(String tableName, List<Field> fields) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    protected void updateTable(String tableName, List<Field> fields) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    protected void resetTable(String tableName, List<Field> fields) {
+        // TODO Auto-generated method stub
+        
+    }
 	
 	@Override
 	public void delete(Object entity) {
@@ -194,4 +213,5 @@ public class SQLiteDataBaseHelper extends DataBaseManager {
 		
 		return value;
 	}
+
 }
