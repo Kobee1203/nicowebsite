@@ -244,7 +244,7 @@ public abstract class DataBaseManager {
             BufferedReader reader = null;
             InputStreamReader isReader = null;
             try {
-                isReader = new InputStreamReader(is, encoding);
+                isReader = encoding != null ? new InputStreamReader(is, encoding) : new InputStreamReader(is);
                 reader = new BufferedReader(isReader);
                 while ((line = reader.readLine()) != null) {
                     if (!line.startsWith("--") && !line.startsWith("//") && !line.startsWith("#")) {
