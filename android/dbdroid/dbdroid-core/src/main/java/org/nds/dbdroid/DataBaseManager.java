@@ -1,9 +1,13 @@
 package org.nds.dbdroid;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +45,7 @@ public abstract class DataBaseManager {
     private enum PropertyKey {
         GENERATE_DB("dbdroid.generate"),
         SHOW_QUERY("dbdroid.show_query"),
+        SCRIPT_ENCODING("dbdroid.script_encoding"),
         CREATING_SCRIPT("dbdroid.creating_script"),
         UPDATING_SCRIPT("dbdroid.updating_script"),
         RESETING_SCRIPT("dbdroid.reseting_script");
@@ -157,7 +162,10 @@ public abstract class DataBaseManager {
 
     private void onCreate() throws DBDroidException {
         try {
-            String script = getScriptContent(properties.getProperty(PropertyKey.CREATING_SCRIPT.toString()));
+            String scriptPath = properties.getProperty(PropertyKey.CREATING_SCRIPT.toString());
+            String encoding = properties.getProperty(PropertyKey.SCRIPT_ENCODING.toString());
+            String script = getScriptContent(scriptPath, encoding);
+
             createDataBase(script);
 
             for (Map.Entry<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> e : daos.entrySet()) {
@@ -177,7 +185,10 @@ public abstract class DataBaseManager {
 
     private void onUpdate() throws DBDroidException {
         try {
-            String script = getScriptContent(properties.getProperty(PropertyKey.UPDATING_SCRIPT.toString()));
+            String scriptPath = properties.getProperty(PropertyKey.UPDATING_SCRIPT.toString());
+            String encoding = properties.getProperty(PropertyKey.SCRIPT_ENCODING.toString());
+            String script = getScriptContent(scriptPath, encoding);
+
             updateDataBase(script);
 
             for (Map.Entry<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> e : daos.entrySet()) {
@@ -197,7 +208,10 @@ public abstract class DataBaseManager {
 
     private void onReset() throws DBDroidException {
         try {
-            String script = getScriptContent(properties.getProperty(PropertyKey.RESETING_SCRIPT.toString()));
+            String scriptPath = properties.getProperty(PropertyKey.RESETING_SCRIPT.toString());
+            String encoding = properties.getProperty(PropertyKey.SCRIPT_ENCODING.toString());
+            String script = getScriptContent(scriptPath, encoding);
+
             resetDataBase(script);
 
             for (Map.Entry<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> e : daos.entrySet()) {
@@ -215,14 +229,44 @@ public abstract class DataBaseManager {
         }
     }
 
-    private String getScriptContent(String value) throws FileNotFoundException {
+    private String getScriptContent(String value, String encoding) throws IOException {
         if (value != null) {
-            InputStream is = null;
+            InputStream is;
             if (value.startsWith(CLASSPATH_PREFIX)) {
                 is = getClass().getResourceAsStream(value.substring(value.indexOf(CLASSPATH_PREFIX) + (CLASSPATH_PREFIX.length() + 1)));
             } else {
                 is = new FileInputStream(new File(value));
             }
+
+            StringBuilder sb = new StringBuilder();
+            String line;
+
+            BufferedReader reader = null;
+            InputStreamReader isReader = null;
+            try {
+                isReader = new InputStreamReader(is, encoding);
+                reader = new BufferedReader(isReader);
+                while ((line = reader.readLine()) != null) {
+                    if (!line.startsWith("--") && !line.startsWith("//") && !line.startsWith("#")) {
+                        sb.append(line).append("\n");
+                    }
+                }
+            } finally {
+                try {
+                    is.close();
+                } catch (Exception exc) {
+                }
+                try {
+                    isReader.close();
+                } catch (Exception exc) {
+                }
+                try {
+                    reader.close();
+                } catch (Exception exc) {
+                }
+            }
+            return sb.toString();
+
         }
         return null;
     }
