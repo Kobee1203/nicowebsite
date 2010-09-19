@@ -11,8 +11,14 @@ public class Entity3 {
 	
 	private String name;
 	
-	public Entity3(String name) {
+	private byte[] document;
+	
+	// Default Constructor
+	public Entity3() {}
+	
+	public Entity3(String name, byte[] document) {
 		this.name = name;
+		this.document = document;
 	}
 	
 	public void set_id(Integer _id) {
@@ -29,5 +35,13 @@ public class Entity3 {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public void setDocument(byte[] document) {
+		this.document = document;
+	}
+	
+	public byte[] getDocument() {
+		return document;
 	}
 }

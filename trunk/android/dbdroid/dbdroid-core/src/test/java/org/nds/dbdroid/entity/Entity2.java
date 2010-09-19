@@ -9,10 +9,13 @@ public class Entity2 {
 	@Id
 	private Integer _id;
 	
-	private String name;
+	private Long time;
 	
-	public Entity2(String name) {
-		this.name = name;
+	// Default Constructor
+	public Entity2() {}
+	
+	public Entity2(Long time) {
+		this.time = time;
 	}
 	
 	public void set_id(Integer _id) {
@@ -23,11 +26,11 @@ public class Entity2 {
 		return _id;
 	}
 	
-	public void setName(String name) {
-		this.name = name;
+	public void setTime(Long time) {
+		this.time = time;
 	}
 	
-	public String getName() {
-		return name;
+	public Long getTime() {
+		return time;
 	}
 }

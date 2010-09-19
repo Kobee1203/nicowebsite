@@ -3,11 +3,10 @@ package org.nds.dbdroid;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,272 +29,277 @@ import org.xml.sax.XMLReader;
 
 public abstract class DataBaseManager {
 
-    private static final Log log = LogFactory.getLog(DataBaseManager.class);
+	private static final Log log = LogFactory.getLog(DataBaseManager.class);
 
-    private static final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
-    private static final String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
-    private static final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
+	private static final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
+	private static final String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
+	private static final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
 
-    private static final String CLASSPATH_PREFIX = "classpath:";
+	private static final String CLASSPATH_PREFIX = "classpath:";
 
-    private static final String CREATE_VALUE = "create";
-    private static final String UPDATE_VALUE = "update";
-    private static final String RESET_VALUE = "reset";
+	private static final String CREATE_VALUE = "create";
+	private static final String UPDATE_VALUE = "update";
+	private static final String RESET_VALUE = "reset";
 
-    private enum PropertyKey {
-        GENERATE_DB("dbdroid.generate"),
-        SHOW_QUERY("dbdroid.show_query"),
-        SCRIPT_ENCODING("dbdroid.script_encoding"),
-        CREATING_SCRIPT("dbdroid.creating_script"),
-        UPDATING_SCRIPT("dbdroid.updating_script"),
-        RESETING_SCRIPT("dbdroid.reseting_script");
+	private enum PropertyKey {
+		GENERATE_DB("dbdroid.generate"),
+		SHOW_QUERY("dbdroid.show_query"),
+		SCRIPT("dbdroid.script"),
+		SCRIPT_ENCODING("dbdroid.script_encoding");
 
-        private String key;
+		private String key;
 
-        private PropertyKey(String key) {
-            this.key = key;
-        }
+		private PropertyKey(String key) {
+			this.key = key;
+		}
 
-        public static PropertyKey getValueOf(String key) {
-            for (PropertyKey propertyKey : values()) {
-                if (key.equals(propertyKey.key)) {
-                    return propertyKey;
-                }
-            }
-            return null;
-        }
+		public static PropertyKey getValueOf(String key) {
+			for (PropertyKey propertyKey : values()) {
+				if (key.equals(propertyKey.key)) {
+					return propertyKey;
+				}
+			}
+			return null;
+		}
 
-        @Override
-        public String toString() {
-            return this.key;
-        }
-    }
+		@Override
+		public String toString() {
+			return this.key;
+		}
+	}
 
-    private Properties properties;
-    private Map<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> daos = new HashMap<Class<? extends AndroidDAO<?>>, AndroidDAO<?>>();
+	private Properties properties;
+	private Map<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> daos = new HashMap<Class<? extends AndroidDAO<?>>, AndroidDAO<?>>();
 
-    public DataBaseManager(InputStream config) throws DBDroidException {
-        if (config != null) {
-            loadConfig(config);
-        } else {
-            log.warn("XML dbdroid configuration not found." + (config == null ? "Config inputStream object is NULL." : ""));
-        }
-    }
+	private Map<String, Class<?>> entityFromTableName = new HashMap<String, Class<?>>();
+	private Map<Class<?>, AndroidDAO<?>> daoFromEntity = new HashMap<Class<?>, AndroidDAO<?>>();
 
-    private void loadConfig(InputStream config) throws DBDroidException {
-        try {
-            /** Handling XML */
-            SAXParserFactory spf = SAXParserFactory.newInstance();
-            spf.setNamespaceAware(true);
-            spf.setValidating(true);
-            SAXParser sp = spf.newSAXParser();
-            try {
-                sp.setProperty(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
-                sp.setProperty(JAXP_SCHEMA_SOURCE, new File(getClass().getResource("/xsd/dbdroid.xsd").toURI()));
-            } catch (SAXNotRecognizedException x) {
-                // Happens if the parser does not support JAXP 1.2
-                log.debug("parser does not support JAXP 1.2");
-            }
-            XMLReader xr = sp.getXMLReader();
+	public DataBaseManager(InputStream config) throws DBDroidException {
+		if (config != null) {
+			loadConfig(config);
+		} else {
+			log.warn("XML dbdroid configuration not found." + (config == null ? "Config inputStream object is NULL." : ""));
+		}
+	}
 
-            /** Create handler to handle XML Tags ( extends DefaultHandler ) */
-            ConfigXMLHandler configXMLHandler = new ConfigXMLHandler(this);
-            xr.setErrorHandler(new ConfigXMLErrorHandler());
-            xr.setContentHandler(configXMLHandler);
-            xr.parse(new InputSource(config));
+	private void loadConfig(InputStream config) throws DBDroidException {
+		try {
+			/** Handling XML */
+			SAXParserFactory spf = SAXParserFactory.newInstance();
+			spf.setNamespaceAware(true);
+			spf.setValidating(true);
+			SAXParser sp = spf.newSAXParser();
+			try {
+				sp.setProperty(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
+				sp.setProperty(JAXP_SCHEMA_SOURCE, new File(getClass().getResource("/xsd/dbdroid.xsd").toURI()));
+			} catch (SAXNotRecognizedException x) {
+				// Happens if the parser does not support JAXP 1.2
+				log.debug("parser does not support JAXP 1.2");
+			}
+			XMLReader xr = sp.getXMLReader();
 
-            daos = configXMLHandler.getDaos();
-            properties = configXMLHandler.getProperties();
-        } catch (Exception e) {
-            throw new DBDroidException("XML Pasing Exception = " + e, e);
-        }
+			/** Create handler to handle XML Tags ( extends DefaultHandler ) */
+			ConfigXMLHandler configXMLHandler = new ConfigXMLHandler(this);
+			xr.setErrorHandler(new ConfigXMLErrorHandler());
+			xr.setContentHandler(configXMLHandler);
+			xr.parse(new InputSource(config));
 
-        processProperties();
-    }
+			daos = configXMLHandler.getDaos();
+			properties = configXMLHandler.getProperties();
+		} catch (Exception e) {
+			throw new DBDroidException("XML Pasing Exception = " + e, e);
+		}
 
-    private void processProperties() throws DBDroidException {
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            String key = (String) entry.getKey();
-            String value = (String) entry.getValue();
+		processProperties();
+	}
 
-            PropertyKey propertyKey = PropertyKey.getValueOf(key);
-            if (propertyKey != null) {
-                switch (propertyKey) {
-                    case GENERATE_DB:
-                        log.debug("-- generate DB --");
-                        if (CREATE_VALUE.equalsIgnoreCase(value)) {
-                            onCreate();
-                        } else if (UPDATE_VALUE.equalsIgnoreCase(value)) {
-                            onUpdate();
-                        } else if (RESET_VALUE.equalsIgnoreCase(value)) {
-                            onReset();
-                        }
-                        break;
-                    case CREATING_SCRIPT:
-                        log.debug("-- creating script --");
-                        break;
-                    case UPDATING_SCRIPT:
-                        log.debug("-- updating script --");
-                        break;
-                    case RESETING_SCRIPT:
-                        log.debug("-- reseting script --");
-                        break;
-                    case SHOW_QUERY:
-                        log.debug("-- show query --");
-                        break;
-                    default:
-                        log.info("Property key: " + key + " (value: " + value + ")");
-                }
-            } else {
-                log.warn("Unknown property key: " + key);
-            }
-        }
-    }
+	private void processProperties() throws DBDroidException {
+		for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+			String key = (String) entry.getKey();
+			String value = (String) entry.getValue();
 
-    public <T extends AndroidDAO<?>> T getDAO(Class<T> daoClass) {
-        T dao = (T) daos.get(daoClass);
-        if (dao == null) {
-            throw new NullPointerException("DAO class '" + daoClass + "' not found. Verify the XML dbdroid configuration.");
-        }
-        return dao;
-    }
+			PropertyKey propertyKey = PropertyKey.getValueOf(key);
+			if (propertyKey != null) {
+				switch (propertyKey) {
+				case GENERATE_DB:
+					log.debug("-- generate DB --");
+					generateDataBase(value);
+					break;
+				case SCRIPT:
+					log.debug("-- script --");
+					String encoding = properties.getProperty(PropertyKey.SCRIPT_ENCODING.toString());
+					runScript(value, encoding);
+					break;
+				case SCRIPT_ENCODING:
+					log.debug("-- script encoding: " + value + " --");
+				case SHOW_QUERY:
+					log.debug("-- show query --");
+					break;
+				default:
+					log.info("Property key: " + key + " (value: " + value + ")");
+				}
+			} else {
+				log.warn("Unknown property key: " + key);
+			}
+		}
+	}
 
-    private void onCreate() throws DBDroidException {
-        try {
-            String scriptPath = properties.getProperty(PropertyKey.CREATING_SCRIPT.toString());
-            String encoding = properties.getProperty(PropertyKey.SCRIPT_ENCODING.toString());
-            String script = getScriptContent(scriptPath, encoding);
+	public <T extends AndroidDAO<?>> T getDAO(Class<T> daoClass) {
+		T dao = (T) daos.get(daoClass);
+		if (dao == null) {
+			throw new NullPointerException("DAO class '" + daoClass + "' not found. Verify the XML dbdroid configuration.");
+		}
+		return dao;
+	}
 
-            createDataBase(script);
+	protected AndroidDAO<?> getDAOFromEntity(Class<?> entity) {
+		return daoFromEntity.get(entity);
+	}
 
-            for (Map.Entry<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> e : daos.entrySet()) {
-                AndroidDAO<?> dao = e.getValue();
-                Class<?> entityClass = dao.getEntityClass();
-                log.debug("entityClass: " + entityClass);
-                String tableName = EntityHelper.getTableName(entityClass);
-                log.debug("Table name: " + EntityHelper.getTableName(entityClass));
-                List<Field> fields = EntityHelper.getFields(entityClass);
-                log.debug("fields: " + fields);
-                createTable(tableName, fields);
-            }
-        } catch (Exception e) {
-            throw new DBDroidException(e.getMessage(), e);
-        }
-    }
+	protected Class<?> getEntityFromTableName(String tableName) {
+		return entityFromTableName.get(tableName);
+	}
 
-    private void onUpdate() throws DBDroidException {
-        try {
-            String scriptPath = properties.getProperty(PropertyKey.UPDATING_SCRIPT.toString());
-            String encoding = properties.getProperty(PropertyKey.SCRIPT_ENCODING.toString());
-            String script = getScriptContent(scriptPath, encoding);
+	private void generateDataBase(String type) throws DBDroidException {
+		try {
+			for (Map.Entry<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> e : daos.entrySet()) {
+				AndroidDAO<?> dao = e.getValue();
+				Class<?> entityClass = dao.getEntityClass();
+				log.debug("entityClass: " + entityClass);
+				String tableName = EntityHelper.getTableName(entityClass);
+				log.debug("Table name: " + tableName);
+				List<Field> fields = EntityHelper.getFields(entityClass);
+				log.debug("fields: " + fields);
 
-            updateDataBase(script);
+				daoFromEntity.put(entityClass, dao);
+				entityFromTableName.put(tableName, entityClass);
 
-            for (Map.Entry<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> e : daos.entrySet()) {
-                AndroidDAO<?> dao = e.getValue();
-                Class<?> entityClass = dao.getEntityClass();
-                log.debug("entityClass: " + entityClass);
-                String tableName = EntityHelper.getTableName(entityClass);
-                log.debug("Table name: " + EntityHelper.getTableName(entityClass));
-                List<Field> fields = EntityHelper.getFields(entityClass);
-                log.debug("fields: " + fields);
-                updateTable(tableName, fields);
-            }
-        } catch (Exception e) {
-            throw new DBDroidException(e.getMessage(), e);
-        }
-    }
+				if (CREATE_VALUE.equalsIgnoreCase(type)) {
+					onCreateTable(tableName, fields);
+				} else if (UPDATE_VALUE.equalsIgnoreCase(type)) {
+					onUpdateTable(tableName, fields);
+				} else if (RESET_VALUE.equalsIgnoreCase(type)) {
+					onResetTable(tableName, fields);
+				}
+			}
+		} catch (Exception e) {
+			throw new DBDroidException(e.getMessage(), e);
+		}
+	}
 
-    private void onReset() throws DBDroidException {
-        try {
-            String scriptPath = properties.getProperty(PropertyKey.RESETING_SCRIPT.toString());
-            String encoding = properties.getProperty(PropertyKey.SCRIPT_ENCODING.toString());
-            String script = getScriptContent(scriptPath, encoding);
+	private void runScript(String scriptPath, String encoding) throws DBDroidException {
+		try {
+			List<String> queries = getQueries(scriptPath, encoding);
+			for (String query : queries) {
+				rawQuery(query.trim());
+			}
+		} catch (Exception e) {
+			throw new DBDroidException(e.getMessage(), e);
+		}
+	}
 
-            resetDataBase(script);
+	private List<String> getQueries(String value, String encoding) throws IOException {
+		List<String> queries = new ArrayList<String>();
 
-            for (Map.Entry<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> e : daos.entrySet()) {
-                AndroidDAO<?> dao = e.getValue();
-                Class<?> entityClass = dao.getEntityClass();
-                log.debug("entityClass: " + entityClass);
-                String tableName = EntityHelper.getTableName(entityClass);
-                log.debug("Table name: " + EntityHelper.getTableName(entityClass));
-                List<Field> fields = EntityHelper.getFields(entityClass);
-                log.debug("fields: " + fields);
-                resetTable(tableName, fields);
-            }
-        } catch (Exception e) {
-            throw new DBDroidException(e.getMessage(), e);
-        }
-    }
+		if (value != null) {
+			InputStream is;
+			if (value.startsWith(CLASSPATH_PREFIX)) {
+				is = getClass().getResourceAsStream(value.substring(value.indexOf(CLASSPATH_PREFIX) + (CLASSPATH_PREFIX.length())));
+			} else {
+				is = new FileInputStream(new File(value));
+			}
 
-    private String getScriptContent(String value, String encoding) throws IOException {
-        if (value != null) {
-            InputStream is;
-            if (value.startsWith(CLASSPATH_PREFIX)) {
-                is = getClass().getResourceAsStream(value.substring(value.indexOf(CLASSPATH_PREFIX) + (CLASSPATH_PREFIX.length() + 1)));
-            } else {
-                is = new FileInputStream(new File(value));
-            }
+			if (is == null) {
+				throw new IOException("Script file not found with path: " + value);
+			}
 
-            StringBuilder sb = new StringBuilder();
-            String line;
+			BufferedReader reader = null;
+			InputStreamReader isReader = null;
+			try {
+				isReader = encoding != null ? new InputStreamReader(is, encoding) : new InputStreamReader(is);
+				reader = new BufferedReader(isReader);
 
-            BufferedReader reader = null;
-            InputStreamReader isReader = null;
-            try {
-                isReader = encoding != null ? new InputStreamReader(is, encoding) : new InputStreamReader(is);
-                reader = new BufferedReader(isReader);
-                while ((line = reader.readLine()) != null) {
-                    if (!line.startsWith("--") && !line.startsWith("//") && !line.startsWith("#")) {
-                        sb.append(line).append("\n");
-                    }
-                }
-            } finally {
-                try {
-                    is.close();
-                } catch (Exception exc) {
-                }
-                try {
-                    isReader.close();
-                } catch (Exception exc) {
-                }
-                try {
-                    reader.close();
-                } catch (Exception exc) {
-                }
-            }
-            return sb.toString();
+				String line;
+				String query = "";
+				while ((line = reader.readLine()) != null) {
+					// Skip empty lines
+					if (line.trim().equals("")) {
+						continue;
+					}
 
-        }
-        return null;
-    }
+					// Skip comments
+					if (line.startsWith("--") || line.startsWith("//") || line.startsWith("#")) {
+						continue;
+					}
 
-    protected void createDataBase(String script) {
-    }
+					query += " " + line;
 
-    protected void updateDataBase(String script) {
-    }
+					if (query.endsWith("/")) { // complete command
+						query = query.replace('/', ' '); // Remove the '/' since jdbc complains
+						queries.add(replaceArguments(query, (String[]) null));
+						query = "";
+					} else if (query.contains(";")) { // One or several complete query(ies)
+						String[] q = query.split(";");
+						// Loop on different queries
+						for (int i = 0; i < (q.length - 1); i++) {
+							queries.add(replaceArguments(q[i], (String[]) null));
+						}
+						// Check if the line ends with
+						if (query.endsWith(";")) {
+							queries.add(replaceArguments(q[q.length - 1], (String[]) null));
+							query = "";
+						} else {
+							query = q[q.length - 1];
+						}
+					}
+				}
+			} finally {
+				try {
+					is.close();
+				} catch (Exception exc) {
+				}
+				try {
+					isReader.close();
+				} catch (Exception exc) {
+				}
+				try {
+					reader.close();
+				} catch (Exception exc) {
+				}
+			}
+		}
+		return queries;
+	}
 
-    protected void resetDataBase(String script) {
-    }
+	private static String replaceArguments(String sqlQuery, String... args) {
+		String query = sqlQuery;
+		if (args != null) {
+			for (int a = 0; a < args.length; a++) {
+				query = query.replace("&" + (a + 1), args[a]);
+			}
+		}
 
-    public abstract void open();
+		return query;
+	}
 
-    public abstract void close();
+	public abstract void open();
 
-    protected abstract void createTable(String tableName, List<Field> fields);
+	public abstract void close();
 
-    protected abstract void updateTable(String tableName, List<Field> fields);
+	protected abstract void onCreateTable(String tableName, List<Field> fields);
 
-    protected abstract void resetTable(String tableName, List<Field> fields);
+	protected abstract void onUpdateTable(String tableName, List<Field> fields);
 
-    public abstract void delete(Object entity);
+	protected abstract void onResetTable(String tableName, List<Field> fields);
 
-    public abstract <E> List<E> findAll(Class<E> entityClass);
+	public abstract void delete(Object entity);
 
-    public abstract <E> E findById(String id, Class<E> entityClazz);
+	public abstract <E> List<E> findAll(Class<E> entityClass);
 
-    public abstract <E> E saveOrUpdate(E entity);
+	public abstract <E> E findById(String id, Class<E> entityClazz);
+
+	public abstract <E> E saveOrUpdate(E entity);
+
+	public abstract void rawQuery(String query);
 
 }
