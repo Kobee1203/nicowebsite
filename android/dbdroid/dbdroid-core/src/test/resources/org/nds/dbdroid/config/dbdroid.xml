@@ -10,6 +10,7 @@
 	<dbdroid:properties>
 		<dbdroid:property name="dbdroid.show_query" value="true" />
 		<dbdroid:property name="dbdroid.generate">update</dbdroid:property>
+		<dbdroid:property name="dbdroid.script" value="classpath:/org/nds/dbdroid/script/script.txt" />
 	</dbdroid:properties>
 </dbdroid:dbdroid-configuration>
 

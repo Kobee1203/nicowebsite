@@ -11,6 +11,9 @@ public class Entity1 {
 	
 	private String name;
 	
+	// Default Constructor
+	public Entity1() {}
+	
 	public Entity1(String name) {
 		this.name = name;
 	}
