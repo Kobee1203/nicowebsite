@@ -28,7 +28,7 @@ public final class EntityHelper {
 		if(tableName == null) {
 			throw new IllegalArgumentException("Table name is NULL for Entity " + entityClass.getClass().getCanonicalName());
 		} else if("".equals(tableName)) {
-			tableName = entityClass.getName().toLowerCase();
+			tableName = entityClass.getSimpleName().toUpperCase();
 			log.debug("Table name is empty -> Define table with lowercase Entity class name: " + tableName);
 		}
 		
