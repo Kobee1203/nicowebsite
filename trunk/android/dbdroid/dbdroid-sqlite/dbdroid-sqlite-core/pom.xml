@@ -3,15 +3,15 @@
     <modelVersion>4.0.0</modelVersion>
     
     <parent>
-        <groupId>org.nds</groupId>
-        <artifactId>dbdroid</artifactId>
+        <groupId>org.nds.dbdroid.sqlite</groupId>
+        <artifactId>dbdroid-sqlite</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     
-    <groupId>org.nds.dbdroid</groupId>
-    <artifactId>dbdroid-core</artifactId>
+    <groupId>org.nds.dbdroid.sqlite</groupId>
+    <artifactId>dbdroid-sqlite-core</artifactId>
     <packaging>jar</packaging>
-    <name>Database for Android core (dbdroid-core)</name>
+    <name>SQLite Database for Android core (dbdroid-sqlite-core)</name>
 
     <repositories>
 		<repository>
@@ -23,6 +23,12 @@
 
     <dependencies>
     	<dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
@@ -32,6 +38,12 @@
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
             <version>1.1.1</version>
+        </dependency>
+
+		<dependency>
+            <groupId>org.nds.dbdroid</groupId>
+        	<artifactId>dbdroid-core</artifactId>
+        	<version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
