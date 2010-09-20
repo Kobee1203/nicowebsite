@@ -112,19 +112,19 @@ public class SQLiteDataBaseHelper extends DataBaseManager {
 	}
 
     @Override
-    protected void createTable(String tableName, List<Field> fields) {
+    protected void onCreateTable(String tableName, List<Field> fields) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    protected void updateTable(String tableName, List<Field> fields) {
+    protected void onUpdateTable(String tableName, List<Field> fields) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    protected void resetTable(String tableName, List<Field> fields) {
+    protected void onResetTable(String tableName, List<Field> fields) {
         // TODO Auto-generated method stub
         
     }
@@ -167,7 +167,12 @@ public class SQLiteDataBaseHelper extends DataBaseManager {
 	public <T> T saveOrUpdate(T entity) {
 		// TODO Auto-generated method stub
 		return null;
-	};
+	}
+	
+	@Override
+	public void rawQuery(String query) {
+	    // TODO Auto-generated method stub   
+	}
 	
 	private <T> T makeEntity(Class<T> entityClazz, Cursor cursor) {
 		T entity = ReflectUtils.getInstance().constructClass(entityClazz);
