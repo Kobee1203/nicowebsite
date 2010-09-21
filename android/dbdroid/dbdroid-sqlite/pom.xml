@@ -43,6 +43,7 @@
     </build>
     
     <modules>
+        <module>dbdroid-sqlite-core</module>
         <module>dbdroid-sqlite-app</module>
         <module>dbdroid-sqlite-test</module>
     </modules>
