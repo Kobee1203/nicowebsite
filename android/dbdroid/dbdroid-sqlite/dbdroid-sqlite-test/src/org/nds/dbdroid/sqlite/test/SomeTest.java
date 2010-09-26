@@ -2,16 +2,15 @@ package org.nds.dbdroid.sqlite.test;
 
 
 import java.io.IOException;
-import java.io.InputStream;
+
+import junit.framework.Assert;
 
 import org.nds.dbdroid.DataBaseManager;
 import org.nds.dbdroid.exception.DBDroidException;
-import org.nds.dbdroid.sqlite.helper.SQLiteDataBaseHelper;
+import org.nds.dbdroid.sqlite.SQLiteDataBaseManager;
 import org.nds.dbdroid.sqlite.test.dao.TestDao;
 
-import junit.framework.Assert;
 import android.test.AndroidTestCase;
-import android.util.Log;
 
 
 public class SomeTest extends AndroidTestCase {
@@ -30,13 +29,13 @@ public class SomeTest extends AndroidTestCase {
     	InputStream is = getContext().getAssets().open("test");
     	Assert.assertNotNull(is);*/
     	
-    	DataBaseManager dbHelper = new SQLiteDataBaseHelper(getContext(), "test", null, 1);
-    	dbHelper.open();
+    	DataBaseManager dbManager = new SQLiteDataBaseManager(getContext().getAssets().open("dbdroid/dbdroid.xml"), getContext(), "dbdroid/test-sqlite.db", null, 1);
+    	dbManager.open();
     	
-    	TestDao testDao = dbHelper.getDAO(TestDao.class);
+    	TestDao testDao = dbManager.getDAO(TestDao.class);
     	
     	testDao.findAll();
     	
-    	dbHelper.close();
+    	dbManager.close();
     }
 }
