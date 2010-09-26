@@ -13,7 +13,6 @@
             </intent-filter>
         </activity>
         <provider android:name="org.nds.database.HangmanProvider" android:authorities="org.nds.database.hangmanprovider" />
-        <provider android:name="org.nds.database.EntityProvider" android:authorities="org.nds.database.entityprovider" />
     </application>
 
 

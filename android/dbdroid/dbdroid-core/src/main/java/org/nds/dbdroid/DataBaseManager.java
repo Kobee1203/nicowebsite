@@ -15,21 +15,20 @@ import java.util.Properties;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.nds.dbdroid.config.ConfigXMLErrorHandler;
 import org.nds.dbdroid.config.ConfigXMLHandler;
 import org.nds.dbdroid.dao.AndroidDAO;
 import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.helper.EntityHelper;
 import org.nds.dbdroid.helper.Field;
+import org.nds.dbdroid.log.Logger;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.XMLReader;
 
 public abstract class DataBaseManager {
 
-	private static final Log log = LogFactory.getLog(DataBaseManager.class);
+	private static final Logger log = Logger.getLogger(DataBaseManager.class);
 
 	private static final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
 	private static final String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";

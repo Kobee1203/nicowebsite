@@ -5,17 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.azeckoski.reflectutils.ClassFields;
 import org.azeckoski.reflectutils.ReflectUtils;
 import org.nds.dbdroid.annotation.Column;
 import org.nds.dbdroid.annotation.Entity;
 import org.nds.dbdroid.annotation.Id;
+import org.nds.dbdroid.log.Logger;
 
 public final class EntityHelper {
 
-    private static final Log log = LogFactory.getLog(EntityHelper.class);
+    private static final Logger log = Logger.getLogger(EntityHelper.class);
 	
 	private EntityHelper() {
 	}

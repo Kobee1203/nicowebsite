@@ -3,13 +3,12 @@ package org.nds.dbdroid.dao;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.nds.dbdroid.DataBaseManager;
+import org.nds.dbdroid.log.Logger;
 
 public class AndroidDAO<T> implements GenericDAO<T, String> {
 
-    private static final Log log = LogFactory.getLog(AndroidDAO.class);
+    private static final Logger log = Logger.getLogger(AndroidDAO.class);
 	
 	protected DataBaseManager dbManager;
 	

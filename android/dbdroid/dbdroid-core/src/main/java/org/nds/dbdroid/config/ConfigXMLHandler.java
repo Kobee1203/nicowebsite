@@ -12,17 +12,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.nds.dbdroid.DataBaseManager;
 import org.nds.dbdroid.dao.AndroidDAO;
+import org.nds.dbdroid.log.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class ConfigXMLHandler extends DefaultHandler {
 	
-	private static final Log log = LogFactory.getLog(ConfigXMLHandler.class);
+	private static final Logger log = Logger.getLogger(ConfigXMLHandler.class);
 
 	private static final String DAO_ELEMENT = "dao";
 	private static final String DAO_CLASS_ATTR = "class";
