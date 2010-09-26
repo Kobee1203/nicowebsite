@@ -7,19 +7,18 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.azeckoski.reflectutils.ReflectUtils;
 import org.nds.dbdroid.DataBaseManager;
 import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.helper.EntityHelper;
 import org.nds.dbdroid.helper.Field;
+import org.nds.dbdroid.log.Logger;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.database.sqlite.SQLiteOpenHelper;
 
 public class SQLiteDataBaseManager extends DataBaseManager {
 
