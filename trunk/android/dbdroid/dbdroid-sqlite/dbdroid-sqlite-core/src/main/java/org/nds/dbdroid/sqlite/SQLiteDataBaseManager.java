@@ -23,7 +23,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 
 public class SQLiteDataBaseManager extends DataBaseManager {
 
-	private static final Log log = LogFactory.getLog(SQLiteDataBaseManager.class);
+	private static final Logger log = Logger.getLogger(SQLiteDataBaseManager.class);
 	
 	private SQLiteHelper sqliteHelper;
 	

@@ -6,17 +6,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.azeckoski.reflectutils.ReflectUtils;
 import org.nds.dbdroid.DataBaseManager;
 import org.nds.dbdroid.annotation.Id;
 import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.helper.Field;
+import org.nds.dbdroid.log.Logger;
 
 public class MockDataBaseManager extends DataBaseManager {
 
-    private static final Log log = LogFactory.getLog(MockDataBaseManager.class);
+    private static final Logger log = Logger.getLogger(MockDataBaseManager.class);
 
     private static final Map<Class<?>, Map<String, Object>> entities = new HashMap<Class<?>, Map<String, Object>>();
 

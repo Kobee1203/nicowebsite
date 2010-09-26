@@ -1,15 +1,14 @@
 package org.nds.dbdroid.config;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.nds.dbdroid.DataBaseManager;
+import org.nds.dbdroid.log.Logger;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 public class ConfigXMLErrorHandler implements ErrorHandler {
 	
-	private static final Log log = LogFactory.getLog(DataBaseManager.class);
+	private static final Logger log = Logger.getLogger(DataBaseManager.class);
 	
 	public void warning(SAXParseException e) throws SAXException {
 		log.warn(e.getMessage(), e);
