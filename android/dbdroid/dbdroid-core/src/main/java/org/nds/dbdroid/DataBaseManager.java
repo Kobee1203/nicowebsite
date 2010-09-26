@@ -26,6 +26,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.XMLReader;
 
+import android.util.Xml;
+
 public abstract class DataBaseManager {
 
 	private static final Logger log = Logger.getLogger(DataBaseManager.class);
@@ -83,10 +85,12 @@ public abstract class DataBaseManager {
 
 	private void loadConfig(InputStream config) throws DBDroidException {
 		try {
+			// http://developer.android.com/reference/android/util/Xml.html
+			Xml xml = new Xml();
 			/** Handling XML */
 			SAXParserFactory spf = SAXParserFactory.newInstance();
 			spf.setNamespaceAware(true);
-			spf.setValidating(true);
+			// spf.setValidating(true);
 			SAXParser sp = spf.newSAXParser();
 			try {
 				sp.setProperty(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
