@@ -32,5 +32,25 @@
     
     <!-- Declare the Resolver -->
     <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
-
+   
+    <!-- Mail Service -->
+    <bean id="mailService" class="org.nds.mail.MailService">
+        <constructor-arg ref="mailSender" />
+        <constructor-arg ref="templateMessage" />
+<!--        <constructor-arg ref="mailProperties" />-->
+    </bean>
+    
+    <!-- this is a template message that we can pre-load with default state -->
+    <bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
+        <property name="from"><value><![CDATA[My Web Site <noreply@mywebsite.org>]]></value></property>
+        <property name="subject" value="Validate your registration" />
+        <property name="text">
+            <value>
+                <![CDATA[
+                    Dear %{mail.smtp.to},
+                    Mail Content : %s
+                ]]>
+            </value>
+        </property>
+    </bean>
 </beans>

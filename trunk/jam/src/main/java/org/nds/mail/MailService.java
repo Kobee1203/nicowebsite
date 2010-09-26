@@ -20,7 +20,10 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
-public class MailService {
+/**
+ * @author Nicolas
+ */
+public final class MailService {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -44,15 +47,15 @@ public class MailService {
 		this.properties = props;
 	}
 
-	public void sendMail(String mail) {
+	public final void sendMail(String mail) {
 		sendMail(mail, null, null);
 	}
 
-	public void sendMail(String mail, Properties props) {
+	public final void sendMail(String mail, Properties props) {
 		sendMail(mail, props, null);
 	}
 
-	public void sendMail(String mail, Properties props, List<Resource> attachments) {
+	public final void sendMail(String mail, Properties props, List<Resource> attachments) {
 		MimeMessage message = mailSender.createMimeMessage();
 
 		try {
@@ -66,12 +69,12 @@ public class MailService {
 			String content = templateMessage.getText();
 			if (props != null) {
 				for (Map.Entry<Object, Object> entry : props.entrySet()) {
-					content = content.replace("${" + entry.getKey() + "}", (String) entry.getValue());
+					content = content.replace("%{" + entry.getKey() + "}", (String) entry.getValue());
 				}
 			}
 			if (properties != null) {
 				for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-					content = content.replace("${" + entry.getKey() + "}", (String) entry.getValue());
+					content = content.replace("%{" + entry.getKey() + "}", (String) entry.getValue());
 				}
 			}
 			helper.setText(content);
@@ -94,7 +97,7 @@ public class MailService {
 		mailSender.send(message);
 	}
 
-	public void setAttachments(List<Object> attachments) {
+	public final void setAttachments(List<Object> attachments) {
 		for (Object obj : attachments) {
 			if (obj instanceof Resource) {
 				resourceAttachments.add((Resource) obj);
