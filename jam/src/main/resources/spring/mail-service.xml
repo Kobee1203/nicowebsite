@@ -26,23 +26,4 @@
         <property name="session" ref="mailSession" />
     </bean>
 
-    <!-- this is a template message that we can pre-load with default state -->
-    <bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
-        <property name="from"><value><![CDATA[Jam Team <noreply@jam.org>]]></value></property>
-        <property name="subject" value="Validate your registration" />
-        <property name="text">
-        	<value>
-        		<![CDATA[
-        			Dear %s,
-        			Mail Content : %s
-        		]]>
-        	</value>
-        </property>
-    </bean>
-
-    <bean id="mailService" class="org.nds.mail.MailService">
-        <constructor-arg ref="mailSender" />
-        <constructor-arg ref="templateMessage" />
-        <constructor-arg ref="mailProperties" />
-    </bean>
 </beans>

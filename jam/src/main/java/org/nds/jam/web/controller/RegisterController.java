@@ -10,6 +10,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.nds.jam.web.jpa.bean.Rights;
 import org.nds.jam.web.jpa.bean.User;
 import org.nds.jam.web.service.UserManager;
@@ -33,14 +35,16 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
 @Controller
 public class RegisterController implements InitializingBean {
 
-	@Autowired
-	UserManager userManager;
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	@Autowired
-	ImageCaptchaService captchaService;
+	private UserManager userManager;
 
 	@Autowired
-	MailService mailService;
+	private ImageCaptchaService captchaService;
+
+	@Autowired
+	private MailService mailService;
 
 	public void afterPropertiesSet() throws Exception {
 		if (userManager == null) {
@@ -50,7 +54,7 @@ public class RegisterController implements InitializingBean {
 			throw new ApplicationContextException("Must set captchaService bean property on " + getClass());
 		}
 		if (mailService == null) {
-			throw new ApplicationContextException("Must set mailService bean property on " + getClass());
+			logger.warn("MailService Class intance not found. Cannot initialize mail service on " + getClass());
 		}
 	}
 
@@ -131,7 +135,9 @@ public class RegisterController implements InitializingBean {
 		}
 
 		// Send confirmation mail
-		mailService.sendMail(user.getUsername());
+		if (mailService != null) {
+			mailService.sendMail(user.getUsername());
+		}
 
 		model.addAttribute("statusMessageKey", "register.form.msg.success");
 	}

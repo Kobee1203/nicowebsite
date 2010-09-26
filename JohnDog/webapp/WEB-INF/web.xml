@@ -109,14 +109,14 @@
 		<filter-name>MyFacesExtensionsFilter</filter-name>
 		<filter-class>org.apache.myfaces.webapp.filter.ExtensionsFilter</filter-class>
 		<init-param>
+            <description>Set the size limit for uploaded files.
+                Format: 10 - 10 bytes
+                        10k - 10 KB
+                        10m - 10 MB
+                        1g - 1 GB
+            </description>
 			<param-name>maxFileSize</param-name>
 			<param-value>10m</param-value>
-			<description>Set the size limit for uploaded files.
-            	Format: 10 - 10 bytes
-                	    10k - 10 KB
-                    	10m - 10 MB
-                    	1g - 1 GB
-			</description>
 		</init-param>
 		<init-param>
 			<param-name>uploadRepositoryPath</param-name>
