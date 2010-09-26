@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+<!-- ===========================================================================
+CONTROLLERS
+============================================================================ -->
+    
+    <!--  Controller for the "HOME" page -->
+    <bean id="homeController" class="org.nds.web.controller.HomeController">
+        <property name="sessionForm"><value>true</value></property>
+        <property name="commandName"><value>form</value></property>
+        <property name="commandClass"><value>org.nds.web.formbean.HomeForm</value></property>
+        <property name="formView"><value>home</value></property>
+    </bean>
+
+    <!--  Controller for the "Register" page -->
+    <bean id="registerController" class="org.nds.web.controller.RegisterController">
+        <property name="sessionForm"><value>true</value></property>
+        <property name="commandName"><value>form</value></property>
+        <property name="commandClass"><value>org.nds.web.formbean.RegisterForm</value></property>
+        <property name="formView"><value>unsecuredregister</value></property>
+        <property name="validator"><ref bean="registerValidator"/></property>
+        <property name="successView"><value>home.html</value></property>
+        
+        <property name="captchaService" ref="captchaService"/>
+        <property name="userManager" ref="userManager"/>
+    </bean>
+
+    <!--  Controller for the "Register" page -->
+    <bean id="captchaController" class="org.nds.security.captcha.CaptchaController">      
+        <property name="captchaService" ref="captchaService"/>
+    </bean>
+
+<!-- ===========================================================================
+VALIDATORS
+============================================================================ -->    
+
+    <bean class="org.nds.web.validator.RegisterValidator" id="registerValidator">
+        <property name="userManager" ref="userManager"/>
+    </bean>
+    
+</beans>

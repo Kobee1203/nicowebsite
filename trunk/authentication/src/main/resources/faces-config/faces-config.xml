@@ -3,10 +3,26 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
     version="2.0">
     
+    <!-- Application Config -->
+    <application>
+        <el-resolver>
+            org.springframework.web.jsf.el.SpringBeanFacesELResolver
+        </el-resolver>
+    </application>
+       
+    <!-- Managed Beans -->
     <managed-bean>
-	   <managed-bean-name>homeBean</managed-bean-name>
-	   <managed-bean-class>com.nds.managedbeans.HomeBean</managed-bean-class>
-	   <managed-bean-scope>request</managed-bean-scope>
+       <managed-bean-name>homeBean</managed-bean-name>
+       <managed-bean-class>org.nds.managedbeans.HomeBean</managed-bean-class>
+       <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
     
+    <managed-bean>
+        <description>
+            Current logged in user's authentication information
+        </description>
+        <managed-bean-name>loginBean</managed-bean-name>
+        <managed-bean-class>org.nds.web.managedbeans.LoginBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
 </faces-config>

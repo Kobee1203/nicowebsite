@@ -1,42 +1,153 @@
 <?xml version="1.0" encoding="UTF-8"?>
  
-<beans:beans xmlns="http://www.springframework.org/schema/security"
-    xmlns:beans="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:security="http://www.springframework.org/schema/security"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+                                 http://www.springframework.org/schema/beans/spring-beans.xsd
+                                 http://www.springframework.org/schema/security
+                                 http://www.springframework.org/schema/security/spring-security.xsd">
  
-	<global-method-security secured-annotations="enabled">
-	</global-method-security>
+	<security:global-method-security secured-annotations="enabled" />
  
-    <http auto-config="true" access-denied-page="/accessDenied.jsp">
-        <!--intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" /-->
-        <intercept-url pattern="/login.jsp*" filters="none"/>
-        <intercept-url pattern="/admin/*.html" access="ROLE_ADMIN"  />
-        <intercept-url pattern="/**.html" access="ROLE_USER,ROLE_ADMIN" />
+    <security:http auto-config="true" access-denied-page="/accessDenied.jsp">
+        <!-- Restrict URLs based on role -->
+        <!--security:intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" /-->
+        <security:intercept-url pattern="/login*" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+        <security:intercept-url pattern="/captcha.html" filters="none"/>
+        <security:intercept-url pattern="/unsecured*.html" filters="none"/>
+        <security:intercept-url pattern="/admin/*.html" access="ROLE_ADMIN"  />
+        <security:intercept-url pattern="/**.html" access="ROLE_USER,ROLE_ADMIN" />
+        <security:intercept-url pattern="/**.xhtml" access="ROLE_USER,ROLE_ADMIN" />
         
-        <form-login login-page="/WEB-INF/jsp/login.jsp" default-target-url="/home.html" authentication-failure-url="/WEB-INF/jsp/login.jsp?login_error=1" />
-        <logout logout-success-url="/WEB-INF/jsp/login.jsp"/>
-        
-    </http>
+        <!-- Override default login and logout pages -->
+        <security:form-login login-page="/login.xhtml" 
+                             login-processing-url="/loginProcess" 
+                             default-target-url="/home.html" 
+                             authentication-failure-url="/login.xhtml?error=1" />
+        <security:logout logout-url="/logout" logout-success-url="/"/>
+    </security:http>
  
-    <!--
-    Usernames/Passwords are
-        rod/koala
-        dianne/emu
-        scott/wombat
-        peter/opal
-    -->
-    <authentication-manager alias="authenticationManager">
-    	<authentication-provider>
-	        <password-encoder hash="md5"/>
-        	<user-service>
-	            <user name="rod" password="a564de63c2d0da68cf47586ee05984d7" authorities="ROLE_SUPERVISOR, ROLE_USER, ROLE_TELLER" />
-            	<user name="dianne" password="65d15fe9156f9c4bbffd98085992a44e" authorities="ROLE_USER,ROLE_TELLER" />
-            	<user name="scott" password="2b58af6dddbd072ed27ffc86725d7d3a" authorities="ROLE_USER" />
-            	<user name="peter" password="22b5c9accc6e1ba628cedc63a72d57f8" authorities="ROLE_USER" />
-	    	</user-service>
-		</authentication-provider>
-	</authentication-manager>
+    <!-- =================== httpSessionContextIntegrationFilter =========== -->
+    <bean id="httpSessionContextIntegrationFilter" class="org.springframework.security.context.HttpSessionContextIntegrationFilter">
+    </bean>
+    
+    <!-- =================== exceptionTranslationFilter ==================== -->
+    <bean id="exceptionTranslationFilter" class="org.springframework.security.ui.ExceptionTranslationFilter">
+        <property name="authenticationEntryPoint">
+            <ref bean="formLoginAuthenticationEntryPoint" />
+        </property>
+    </bean>
+    
+    <!-- ================= formLoginAuthenticationEntryPoint ================ -->
+    <bean id="formLoginAuthenticationEntryPoint" class="org.springframework.security.ui.webapp.AuthenticationProcessingFilterEntryPoint">
+        <property name="loginFormUrl">
+            <value>/login.xhtml</value>
+        </property>
+        <property name="forceHttps">
+<!-- En phase de développement, ce paramètre peut rester à false 
+     mais doit être passé à true en production pour que les paramètres d'authentification soient cryptés -->
+            <value>false</value>
+        </property>
+    </bean>
+    
+    <!-- ================ formAuthenticationProcessingFilter =============== -->
+    <bean id="formAuthenticationProcessingFilter" class="org.springframework.security.ui.webapp.AuthenticationProcessingFilter">
+        <property name="authenticationManager">
+            <ref bean="authenticationManager" />
+        </property>
+        <property name="authenticationFailureUrl">
+            <value>/login.xhtml?error=true</value>
+        </property>
+        <property name="defaultTargetUrl">
+            <value>/home.html</value>
+        </property>
+        <property name="filterProcessesUrl">
+            <value>/j_acegi_security_check.jsp</value>
+        </property>
+    </bean>
+
+    <!-- ===================== authenticationManager ======================= -->
+    <bean id="authenticationManager" class="org.springframework.security.providers.ProviderManager">
+        <property name="providers">
+            <list>
+                <ref local="authenticationProvider"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- ===================== authenticationProvider ==================== -->
+    <bean id="authenticationProvider" class="org.springframework.security.providers.dao.DaoAuthenticationProvider">
+        <property name="userDetailsService">
+            <ref bean="userDetailsService"/>
+        </property>
+        <property name="passwordEncoder" ref="passwordEncoder"/>
+    </bean>
+
+    <!-- ===================== filterSecurityInterceptor ==================== -->
+    <bean id="filterSecurityInterceptor" class="org.springframework.security.intercept.web.FilterSecurityInterceptor">
+        <property name="authenticationManager" ref="authenticationManager"/>
+        <property name="accessDecisionManager" ref="accessDecisionManager"/>
+        <property name="objectDefinitionSource">
+            <value>
+                CONVERT_URL_TO_LOWERCASE_BEFORE_COMPARISON
+                PATTERN_TYPE_APACHE_ANT
+                /**/*.html=ROLE_USER
+                /**/*.xhtml=ROLE_USER
+            </value>
+        </property>
+        <property name="observeOncePerRequest" value="false"/>
+    </bean>
+
+    <!-- ===================== accessDecisionManager ==================== -->
+    <bean id="accessDecisionManager" class="org.springframework.security.vote.UnanimousBased">
+        <property name="decisionVoters">
+            <list>
+                <ref bean="roleVoter" />
+            </list>
+        </property>
+    </bean>
+
+    <bean id="roleVoter" class="org.springframework.security.vote.RoleVoter">
+        <property name="rolePrefix">
+            <value>ROLE_</value>
+        </property>
+    </bean>
+ 
+    <!-- ===================== Password Encoder ===================== -->
+    <bean id="passwordEncoder" class="org.nds.security.encoding.GenericPasswordEncoder">
+        <property name="passwordEncoder" ref="shaPasswordEncoder" />
+    </bean>
+        
+    <bean id="md5PasswordEncoder" class="org.springframework.security.providers.encoding.Md5PasswordEncoder"/>
+    <bean id="shaPasswordEncoder" class="org.springframework.security.providers.encoding.ShaPasswordEncoder"/>
+
+    <!-- ===================== logoutFilter ===================== -->
+    <bean id="logoutFilter" class="org.springframework.security.ui.logout.LogoutFilter">  
+        <constructor-arg value="/"/> <!-- URL redirected to after logout -->  
+        <constructor-arg>  
+            <list>  
+                <bean class="org.springframework.security.ui.logout.SecurityContextLogoutHandler"/>  
+            </list>  
+        </constructor-arg>
+        <property name="filterProcessesUrl" value="/j_acegi_logout"/> 
+    </bean>
+ 
+    <security:authentication-provider>
+        <!--
+        <security:jdbc-user-service data-source-ref="dataSource" />
+        -->
+        <!-- 
+            david:newyork
+            alex:newjersey
+            tim:illinois
+        -->  
+        <security:password-encoder hash="md5" />
+        <security:user-service>
+            <security:user name="david" password="369389d19e24204b4927e30dd7c39efc" authorities="ROLE_USER,ROLE_ADMIN" />
+            <security:user name="alex" password="847c6f184197dc1545d9891d42814a7d" authorities="ROLE_USER" />
+            <security:user name="tim" password="0513111ff330e25c631b5d3e9c0a4aae" authorities="ROLE_USER" />
+        </security:user-service>
+    </security:authentication-provider>
+
 </beans:beans>

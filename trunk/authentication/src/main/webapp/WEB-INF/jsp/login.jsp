@@ -18,5 +18,6 @@
 	<br/>
 	<input type="submit" value="Login"/>
 </form>
+<a href="unsecuredregister.html">Register</a>
 </body>
 </html>
