@@ -1,4 +1,4 @@
-package com.nds.managedbeans;
+package org.nds.managedbeans;
 
 public class HomeBean {
 

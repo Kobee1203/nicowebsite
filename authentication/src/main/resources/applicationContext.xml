@@ -6,19 +6,26 @@
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <!-- Bean for i18n -->
-    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
-	   <property name="basenames">
-           <list>
-    	       <value>/WEB-INF/resourcebundle/messages</value>
-            </list>
+    <bean id="simpleUrlMapping" class = "org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="interceptors">
+                <list>
+                    <ref bean="localeChangeInterceptor"/>
+                    <ref bean="themeChangeInterceptor"/>
+                </list>
+        </property>
+        <property name="mappings">
+            <props>
+                <prop key="home.html">homeController</prop>
+                <prop key="unsecuredregister.html">registerController</prop>
+                <prop key="captcha.html">captchaController</prop>
+             </props>
         </property>
     </bean>
-    <!-- End of i18n -->
-    
-    <bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
-        <property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView"/>
-    </bean>
+
+<!-- ===========================================================================
+TILES CONFIGURATION
+NOTE: 
+==============================================================================-->
 
     <bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
         <property name="definitions">
@@ -28,4 +35,46 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         </property>
     </bean>
 
+<!-- ===========================================================================
+INTERCEPTORS
+NOTE: 
+==============================================================================-->
+
+    <bean id="localeChangeInterceptor"  class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+       <property name="paramName"><value>locale</value></property>
+    </bean>
+
+    <bean id="themeChangeInterceptor" class="org.springframework.web.servlet.theme.ThemeChangeInterceptor">
+        <property name="paramName"><value>theme</value></property>
+    </bean>
+
+<!-- ===========================================================================
+RESOLVERS
+NOTE: 
+==============================================================================-->
+  
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView"/>
+    </bean>
+
+    <!-- LOCALE RESOLVER -->
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/> 
+
+    <!-- THEME RESOLVER -->
+    <bean id="themeResolver" class="org.springframework.web.servlet.theme.CookieThemeResolver">
+        <property name="defaultThemeName" value="theme"/>
+    </bean>
+
+    <!-- MULTIPART RESOLVER -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+
+    <!-- MESSAGE SOURCE -->
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+       <property name="basenames">
+           <list>
+               <value>/WEB-INF/resourcebundle/messages</value>
+            </list>
+        </property>
+    </bean>
+    
 </beans>
