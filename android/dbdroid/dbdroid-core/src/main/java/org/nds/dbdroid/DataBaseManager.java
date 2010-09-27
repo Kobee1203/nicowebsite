@@ -26,8 +26,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.XMLReader;
 
-import android.util.Xml;
-
 public abstract class DataBaseManager {
 
 	private static final Logger log = Logger.getLogger(DataBaseManager.class);
@@ -85,27 +83,25 @@ public abstract class DataBaseManager {
 
 	private void loadConfig(InputStream config) throws DBDroidException {
 		try {
-			// http://developer.android.com/reference/android/util/Xml.html
-			Xml xml = new Xml();
 			/** Handling XML */
-			SAXParserFactory spf = SAXParserFactory.newInstance();
-			spf.setNamespaceAware(true);
+			SAXParserFactory factory = SAXParserFactory.newInstance();
+			factory.setNamespaceAware(true);
 			// spf.setValidating(true);
-			SAXParser sp = spf.newSAXParser();
+			SAXParser parser = factory.newSAXParser();
 			try {
-				sp.setProperty(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
-				sp.setProperty(JAXP_SCHEMA_SOURCE, new File(getClass().getResource("/xsd/dbdroid.xsd").toURI()));
+				parser.setProperty(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
+				parser.setProperty(JAXP_SCHEMA_SOURCE, new File(getClass().getResource("/xsd/dbdroid.xsd").toURI()));
 			} catch (SAXNotRecognizedException x) {
 				// Happens if the parser does not support JAXP 1.2
 				log.debug("parser does not support JAXP 1.2");
 			}
-			XMLReader xr = sp.getXMLReader();
+			XMLReader reader = parser.getXMLReader();
 
 			/** Create handler to handle XML Tags ( extends DefaultHandler ) */
 			ConfigXMLHandler configXMLHandler = new ConfigXMLHandler(this);
-			xr.setErrorHandler(new ConfigXMLErrorHandler());
-			xr.setContentHandler(configXMLHandler);
-			xr.parse(new InputSource(config));
+			reader.setErrorHandler(new ConfigXMLErrorHandler());
+			reader.setContentHandler(configXMLHandler);
+			reader.parse(new InputSource(config));
 
 			daos = configXMLHandler.getDaos();
 			properties = configXMLHandler.getProperties();
