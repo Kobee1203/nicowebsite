@@ -20,7 +20,7 @@ public class MockDataBaseManager extends DataBaseManager {
     private static final Map<Class<?>, Map<String, Object>> entities = new HashMap<Class<?>, Map<String, Object>>();
 
     public MockDataBaseManager(InputStream config) throws DBDroidException {
-        super(config);
+        super(config, true);
     }
 
     @Override
@@ -130,7 +130,7 @@ public class MockDataBaseManager extends DataBaseManager {
                     String fieldName = fields[i].replace("'", "").trim();
                     Object value = values[i].replace("'", "").trim();
                     Object fieldType = ReflectUtils.getInstance().getFieldType(entityClass, fieldName);
-                    if(fieldType.equals(byte[].class)) {
+                    if (fieldType.equals(byte[].class)) {
                         value = value.toString().getBytes();
                     }
                     ReflectUtils.getInstance().setFieldValue(entity, fieldName, value, true);
