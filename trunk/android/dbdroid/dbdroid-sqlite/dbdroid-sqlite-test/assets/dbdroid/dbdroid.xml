@@ -4,7 +4,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.nds.org/dbdroid dbdroid.xsd">
 
-	<dbdroid:dao package="org.nds.dbdroid.sqlite.dao" />
+	<dbdroid:dao class="org.nds.dbdroid.sqlite.DbDroidSQLite" />
+	<dbdroid:dao class="org.nds.dbdroid.sqlite.test.TestDao" />
+	<dbdroid:dao package="org.nds.dbdroid.sqlite.test.dao" />
 
 	<dbdroid:properties>
 		<dbdroid:property name="dbdroid.show_query" value="true" />
