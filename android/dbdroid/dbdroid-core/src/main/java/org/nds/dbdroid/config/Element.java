@@ -40,4 +40,13 @@ public class Element {
         this.value = value;
     }
 
+    public String getAttributeValue(String attributeName) {
+        String value = this.getAttributes().getValue(attributeName); // QName
+        if (value == null || value.trim().equals("")) {
+            value = this.getAttributes().getValue("", attributeName); // LocalName
+        }
+
+        return value;
+    }
+
 }

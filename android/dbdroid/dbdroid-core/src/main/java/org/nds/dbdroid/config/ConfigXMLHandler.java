@@ -62,7 +62,7 @@ public class ConfigXMLHandler extends DefaultHandler {
         }
 
         if (localName.equals(DAO_ELEMENT)) {
-            String clazz = current.getAttributes().getValue(DAO_CLASS_ATTR);
+            String clazz = current.getAttributeValue(DAO_CLASS_ATTR);
             if ((clazz == null || clazz.trim().equals("")) && current.getValue() != null) {
                 clazz = current.getValue();
             }
@@ -74,10 +74,7 @@ public class ConfigXMLHandler extends DefaultHandler {
                     throw new SAXException("Class '" + clazz + "' not found!", e);
                 }
             } else { // Classes in a package
-                String packageName = current.getAttributes().getValue(DAO_PACKAGE_ATTR); // QName
-                if (packageName == null || packageName.trim().equals("")) {
-                    packageName = current.getAttributes().getValue("", DAO_PACKAGE_ATTR); // LocalName
-                }
+                String packageName = current.getAttributeValue(DAO_PACKAGE_ATTR);
                 if (packageName == null || packageName.trim().equals("")) {
                     throw new SAXException("'class' or 'package' attribute not defined or empty in the 'dao' element");
                 } else {
@@ -95,14 +92,11 @@ public class ConfigXMLHandler extends DefaultHandler {
             if (properties == null) {
                 throw new SAXException("'property' element found, but there is not 'properties' element.");
             }
-            String name = current.getAttributes().getValue(PROPERTY_NAME_ATTR); // QName
-            if (name == null || name.trim().equals("")) {
-                name = current.getAttributes().getValue("", PROPERTY_NAME_ATTR); // LocalName
-            }
+            String name = current.getAttributeValue(PROPERTY_NAME_ATTR);
             if (name == null || name.trim().equals("")) {
                 throw new SAXException("'name' attribute not defined or empty in the 'property' element");
             }
-            String value = current.getAttributes().getValue(PROPERTY_VALUE_ATTR);
+            String value = current.getAttributeValue(PROPERTY_VALUE_ATTR);
             if (value == null && current.getValue() != null) {
                 value = current.getValue();
             }
