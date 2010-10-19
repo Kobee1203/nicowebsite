@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,8 +21,9 @@ import org.nds.dbdroid.config.ConfigXMLHandler;
 import org.nds.dbdroid.dao.AndroidDAO;
 import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.helper.EntityHelper;
-import org.nds.dbdroid.helper.Field;
 import org.nds.dbdroid.log.Logger;
+import org.nds.dbdroid.reflect.utils.ReflectUtils;
+import org.nds.dbdroid.type.DataType;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.XMLReader;
@@ -41,7 +43,10 @@ public abstract class DataBaseManager {
     private static final String RESET_VALUE = "reset";
 
     private enum PropertyKey {
-        GENERATE_DB("dbdroid.generate"), SHOW_QUERY("dbdroid.show_query"), SCRIPT("dbdroid.script"), SCRIPT_ENCODING("dbdroid.script_encoding");
+        GENERATE_DB("dbdroid.generate"), 
+        SHOW_QUERY("dbdroid.show_query"), 
+        SCRIPT("dbdroid.script"), 
+        SCRIPT_ENCODING("dbdroid.script_encoding");
 
         private String key;
 
@@ -64,26 +69,52 @@ public abstract class DataBaseManager {
         }
     }
 
+    private final InputStream config;
+
+    private boolean xmlConfigValidating;
+
+    private ClassLoader classLoader;
+
     private Properties properties;
     private Map<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> daos = new HashMap<Class<? extends AndroidDAO<?>>, AndroidDAO<?>>();
 
     private final Map<String, Class<?>> entityFromTableName = new HashMap<String, Class<?>>();
     private final Map<Class<?>, AndroidDAO<?>> daoFromEntity = new HashMap<Class<?>, AndroidDAO<?>>();
 
-    public DataBaseManager(InputStream config) throws DBDroidException {
-        if (config != null) {
-            loadConfig(config, false);
-        } else {
-            log.warn("XML dbdroid configuration not found." + (config == null ? "Config inputStream object is NULL." : ""));
-        }
+    public DataBaseManager(InputStream config) {
+        this.config = config;
     }
 
-    public DataBaseManager(InputStream config, boolean validate) throws DBDroidException {
+    /**
+     * Validate the XML configuration. Default value is false.
+     * 
+     * @param xmlConfigValidating
+     */
+    public void setXmlConfigValidating(boolean xmlConfigValidating) {
+        this.xmlConfigValidating = xmlConfigValidating;
+    }
+
+    /**
+     * Class Loader which can be used to load DAO classes within a package.
+     * 
+     * @param classLoader
+     */
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
+    public final void open() throws DBDroidException {
         if (config != null) {
-            loadConfig(config, validate);
+            loadConfig(config, xmlConfigValidating);
         } else {
             log.warn("XML dbdroid configuration not found." + (config == null ? "Config inputStream object is NULL." : ""));
         }
+
+        onOpen();
+    }
+
+    public final void close() throws DBDroidException {
+        onClose();
     }
 
     private void loadConfig(InputStream config, boolean validate) throws DBDroidException {
@@ -105,7 +136,7 @@ public abstract class DataBaseManager {
             XMLReader reader = parser.getXMLReader();
 
             /** Create handler to handle XML Tags ( extends DefaultHandler ) */
-            ConfigXMLHandler configXMLHandler = new ConfigXMLHandler(this);
+            ConfigXMLHandler configXMLHandler = new ConfigXMLHandler(this, classLoader);
             reader.setErrorHandler(new ConfigXMLErrorHandler());
             reader.setContentHandler(configXMLHandler);
             reader.parse(new InputSource(config));
@@ -158,6 +189,10 @@ public abstract class DataBaseManager {
         return dao;
     }
 
+    public Query createQuery(String sql) {
+        return new Query(this, sql);
+    }
+
     protected AndroidDAO<?> getDAOFromEntity(Class<?> entity) {
         return daoFromEntity.get(entity);
     }
@@ -174,7 +209,7 @@ public abstract class DataBaseManager {
                 log.debug("entityClass: " + entityClass);
                 String tableName = EntityHelper.getTableName(entityClass);
                 log.debug("Table name: " + tableName);
-                List<Field> fields = EntityHelper.getFields(entityClass);
+                Field[] fields = ReflectUtils.getPropertyFields(entityClass);
                 log.debug("fields: " + fields);
 
                 daoFromEntity.put(entityClass, dao);
@@ -290,15 +325,15 @@ public abstract class DataBaseManager {
         return query;
     }
 
-    public abstract void open();
+    public abstract void onOpen() throws DBDroidException;
 
-    public abstract void close();
+    public abstract void onClose() throws DBDroidException;
 
-    protected abstract void onCreateTable(String tableName, List<Field> fields);
+    protected abstract void onCreateTable(String tableName, Field[] fields) throws DBDroidException;
 
-    protected abstract void onUpdateTable(String tableName, List<Field> fields);
+    protected abstract void onUpdateTable(String tableName, Field[] fields) throws DBDroidException;
 
-    protected abstract void onResetTable(String tableName, List<Field> fields);
+    protected abstract void onResetTable(String tableName, Field[] fields) throws DBDroidException;
 
     public abstract void delete(Object entity);
 
@@ -309,5 +344,7 @@ public abstract class DataBaseManager {
     public abstract <E> E saveOrUpdate(E entity);
 
     public abstract void rawQuery(String query);
+
+    public abstract DataType getDataType();
 
 }

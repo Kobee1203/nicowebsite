@@ -1,17 +1,22 @@
 package org.nds.dbdroid.mock;
 
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.azeckoski.reflectutils.ReflectUtils;
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.lang.reflect.ConstructorUtils;
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.nds.dbdroid.DataBaseManager;
 import org.nds.dbdroid.annotation.Id;
 import org.nds.dbdroid.exception.DBDroidException;
-import org.nds.dbdroid.helper.Field;
 import org.nds.dbdroid.log.Logger;
+import org.nds.dbdroid.reflect.utils.AnnotationUtils;
+import org.nds.dbdroid.type.DataType;
 
 public class MockDataBaseManager extends DataBaseManager {
 
@@ -20,31 +25,31 @@ public class MockDataBaseManager extends DataBaseManager {
     private static final Map<Class<?>, Map<String, Object>> entities = new HashMap<Class<?>, Map<String, Object>>();
 
     public MockDataBaseManager(InputStream config) throws DBDroidException {
-        super(config, true);
+        super(config);
     }
 
     @Override
-    public void open() {
+    public void onOpen() {
         log.debug("## open");
     }
 
     @Override
-    public void close() {
+    public void onClose() {
         log.debug("## close");
     }
 
     @Override
-    protected void onCreateTable(String tableName, List<Field> fields) {
+    protected void onCreateTable(String tableName, Field[] fields) {
         log.debug("## create table " + tableName + " " + fields);
     }
 
     @Override
-    protected void onUpdateTable(String tableName, List<Field> fields) {
+    protected void onUpdateTable(String tableName, Field[] fields) {
         log.debug("## update table " + tableName + " " + fields);
     }
 
     @Override
-    protected void onResetTable(String tableName, List<Field> fields) {
+    protected void onResetTable(String tableName, Field[] fields) {
         log.debug("## reset table " + tableName + " " + fields);
     }
 
@@ -92,7 +97,7 @@ public class MockDataBaseManager extends DataBaseManager {
         if (objects == null) {
             objects = new HashMap<String, Object>();
         }
-        String id = ReflectUtils.getInstance().getFieldValueAsString(entity, null, Id.class);
+        String id = AnnotationUtils.getPropertyFieldValueAsString(entity, Id.class);
         objects.put(id, entity);
 
         entities.put(entity.getClass(), objects);
@@ -125,20 +130,37 @@ public class MockDataBaseManager extends DataBaseManager {
 
             Class<?> entityClass = getEntityFromTableName(tableName.trim().toUpperCase());
             if (entityClass != null) {
-                Object entity = ReflectUtils.getInstance().constructClass(entityClass);
-                for (int i = 0; i < fields.length; i++) {
-                    String fieldName = fields[i].replace("'", "").trim();
-                    Object value = values[i].replace("'", "").trim();
-                    Object fieldType = ReflectUtils.getInstance().getFieldType(entityClass, fieldName);
-                    if (fieldType.equals(byte[].class)) {
-                        value = value.toString().getBytes();
+                Object entity;
+                try {
+                    entity = ConstructorUtils.invokeConstructor(entityClass, (Object[]) null);
+
+                    for (int i = 0; i < fields.length; i++) {
+                        String fieldName = fields[i].replace("'", "").trim();
+                        Object value = values[i].replace("'", "").trim();
+                        Field field = FieldUtils.getField(entityClass, fieldName, true);
+                        if (field.getType().equals(byte[].class)) {
+                            value = value.toString().getBytes();
+                        }
+                        FieldUtils.writeField(field, entity, ConvertUtils.convert(value, field.getType()), true);
                     }
-                    ReflectUtils.getInstance().setFieldValue(entity, fieldName, value, true);
+                    saveOrUpdate(entity);
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
                 }
-                saveOrUpdate(entity);
             } else {
                 log.warn("Entity not found from table name: " + tableName);
             }
         }
+    }
+
+    @Override
+    public DataType getDataType() {
+        return null;
     }
 }
