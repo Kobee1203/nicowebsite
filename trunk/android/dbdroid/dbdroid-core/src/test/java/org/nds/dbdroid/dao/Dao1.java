@@ -5,8 +5,8 @@ import org.nds.dbdroid.entity.Entity1;
 
 public class Dao1 extends AndroidDAO<Entity1> {
 
-	public Dao1(DataBaseManager dbManager) {
-		super(dbManager);
-	}
+    public Dao1(DataBaseManager dbManager) {
+        super(dbManager);
+    }
 
 }

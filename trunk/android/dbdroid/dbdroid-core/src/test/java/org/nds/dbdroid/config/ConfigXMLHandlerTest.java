@@ -16,26 +16,27 @@ import org.nds.dbdroid.mock.MockDataBaseManager;
 public class ConfigXMLHandlerTest {
 
     @Test
-	public void testConfigParsing() {
-		try {
-			DataBaseManager dbManager = new MockDataBaseManager(getClass().getResourceAsStream("dbdroid.xml"));
-			dbManager.open();
-			Dao1 dao1 = dbManager.getDAO(Dao1.class);
-			Assert.assertNotNull(dao1);
-			Entity1 entity1 = dao1.findById("2");
-			Assert.assertNotNull(entity1);
-			Assert.assertEquals("name2", entity1.getName());
-			List<Entity1> entities1 = dao1.findAll();
-			Assert.assertNotNull(entities1);
-			Assert.assertEquals(2, entities1.size());
-			
-			Entity2 entity2 = dbManager.findById("10", Entity2.class);
-			Assert.assertNotNull(entity2);
+    public void testConfigParsing() {
+        try {
+            DataBaseManager dbManager = new MockDataBaseManager(getClass().getResourceAsStream("dbdroid.xml"));
+            dbManager.setXmlConfigValidating(true);
+            dbManager.open();
+            Dao1 dao1 = dbManager.getDAO(Dao1.class);
+            Assert.assertNotNull(dao1);
+            Entity1 entity1 = dao1.findById("2");
+            Assert.assertNotNull(entity1);
+            Assert.assertEquals("name2", entity1.getName());
+            List<Entity1> entities1 = dao1.findAll();
+            Assert.assertNotNull(entities1);
+            Assert.assertEquals(2, entities1.size());
+
+            Entity2 entity2 = dbManager.findById("10", Entity2.class);
+            Assert.assertNotNull(entity2);
             Assert.assertEquals(new Long(123456789), entity2.getTime());
             List<Entity2> entities2 = dbManager.findAll(Entity2.class);
             Assert.assertNotNull(entities2);
             Assert.assertEquals(3, entities2.size());
-			
+
             Dao3 dao3 = dbManager.getDAO(Dao3.class);
             Entity3 entity3 = dao3.findById("20");
             Assert.assertNotNull(entity3);
@@ -44,11 +45,11 @@ public class ConfigXMLHandlerTest {
             List<Entity3> entities3 = dao3.findAll();
             Assert.assertNotNull(entities3);
             Assert.assertEquals(2, entities3.size());
-            
-			dbManager.close();
-		} catch (DBDroidException e) {
-			e.printStackTrace();
-			Assert.fail();
-		}
-	}
+
+            dbManager.close();
+        } catch (DBDroidException e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+    }
 }

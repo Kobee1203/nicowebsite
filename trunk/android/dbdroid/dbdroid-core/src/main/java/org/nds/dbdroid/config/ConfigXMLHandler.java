@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -38,9 +39,18 @@ public class ConfigXMLHandler extends DefaultHandler {
     private final Map<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> daos = new HashMap<Class<? extends AndroidDAO<?>>, AndroidDAO<?>>();
 
     private final DataBaseManager dbManager;
+    private final ClassLoader classLoader;
 
-    public ConfigXMLHandler(DataBaseManager dbManager) {
+    private final boolean skipInnerClass = false;
+
+    public ConfigXMLHandler(DataBaseManager dbManager, ClassLoader classLoader) {
         this.dbManager = dbManager;
+        if (classLoader != null) {
+            this.classLoader = classLoader;
+        } else {
+            this.classLoader = Thread.currentThread().getContextClassLoader();
+        }
+        assert classLoader != null;
     }
 
     @Override
@@ -84,6 +94,8 @@ public class ConfigXMLHandler extends DefaultHandler {
                     } catch (ClassNotFoundException e) {
                         throw new SAXException("Scanning package " + packageName + ": " + e.getMessage(), e);
                     } catch (IOException e) {
+                        throw new SAXException("Scanning package " + packageName + ": " + e.getMessage(), e);
+                    } catch (URISyntaxException e) {
                         throw new SAXException("Scanning package " + packageName + ": " + e.getMessage(), e);
                     }
                 }
@@ -149,24 +161,22 @@ public class ConfigXMLHandler extends DefaultHandler {
     }
 
     /**
-     * Scans all classes accessible from the context class loader which belong
-     * to the given package and subpackages, and retrieve DAO classes.
+     * Scans all classes accessible from the context class loader which belong to the given package and subpackages, and retrieve DAO classes.
      * 
      * @param packageName
      *            The base package
      * @throws ClassNotFoundException
      * @throws IOException
      * @throws SAXException
+     * @throws URISyntaxException
      */
-    private void retrieveDAOClasses(String packageName) throws ClassNotFoundException, IOException, SAXException {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        assert classLoader != null;
+    private void retrieveDAOClasses(String packageName) throws ClassNotFoundException, IOException, SAXException, URISyntaxException {
         String path = packageName.replace('.', '/');
         Enumeration<URL> resources = classLoader.getResources(path);
         List<File> dirs = new ArrayList<File>();
         while (resources.hasMoreElements()) {
             URL resource = resources.nextElement();
-            dirs.add(new File(resource.getFile()));
+            dirs.add(new File(resource.toURI()));
         }
         for (File directory : dirs) {
             findDAOClasses(directory, packageName);
@@ -174,8 +184,7 @@ public class ConfigXMLHandler extends DefaultHandler {
     }
 
     /**
-     * Recursive method used to find all DAO classes in a given directory and
-     * subdirs.
+     * Recursive method used to find all DAO classes in a given directory and subdirs.
      * 
      * @param directory
      *            The base directory
@@ -190,15 +199,30 @@ public class ConfigXMLHandler extends DefaultHandler {
         }
         File[] files = directory.listFiles();
         for (File file : files) {
+            String fileName = file.getName();
             if (file.isDirectory()) {
-                assert !file.getName().contains(".");
-                findDAOClasses(file, packageName + "." + file.getName());
-            } else if (file.getName().endsWith(".class")) {
-                Class<?> clazz = Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6));
+                assert !fileName.contains(".");
+                findDAOClasses(file, packageName + "." + fileName);
+            } else if (fileName.endsWith(".class") && skipInnerClass(fileName)) {
+                Class<?> clazz = Class.forName(packageName + '.' + fileName.substring(0, fileName.length() - 6), false, classLoader);
+
                 if (AndroidDAO.class.equals(clazz.getSuperclass())) {
                     retrieveDAO(clazz);
                 }
             }
+        }
+    }
+
+    /**
+     * skipped inner, private and anonymous classes (which appear with $ in the class name)
+     * 
+     * @return
+     */
+    private boolean skipInnerClass(String fileName) {
+        if (skipInnerClass) {
+            return !fileName.contains("$");
+        } else {
+            return true;
         }
     }
 

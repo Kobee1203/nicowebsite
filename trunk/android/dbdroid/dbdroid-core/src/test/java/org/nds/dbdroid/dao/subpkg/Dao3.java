@@ -6,8 +6,8 @@ import org.nds.dbdroid.entity.Entity3;
 
 public class Dao3 extends AndroidDAO<Entity3> {
 
-	public Dao3(DataBaseManager dbManager) {
-		super(dbManager);
-	}
+    public Dao3(DataBaseManager dbManager) {
+        super(dbManager);
+    }
 
 }
