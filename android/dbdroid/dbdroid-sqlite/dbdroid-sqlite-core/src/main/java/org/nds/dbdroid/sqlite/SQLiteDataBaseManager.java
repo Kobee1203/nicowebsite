@@ -5,29 +5,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.reflect.ConstructorUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.nds.dbdroid.DataBaseManager;
+import org.nds.dbdroid.Query;
 import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.helper.EntityHelper;
 import org.nds.dbdroid.log.Logger;
@@ -39,83 +29,66 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteQuery;
 
 public class SQLiteDataBaseManager extends DataBaseManager {
 
     private static final Logger log = Logger.getLogger(SQLiteDataBaseManager.class);
 
-    private enum DataTypeAffinity {
-        INTEGER, TEXT, BLOB, REAL, NUMERIC
+    private enum SQLiteDataType {
+        BIGINT,
+        BOOLEAN,
+        BLOB,
+        CLOB,
+        DATE,
+        DATETIME,
+        DOUBLE,
+        FLOAT,
+        INTEGER,
+        JAVA_OBJECT,
+        LONG,
+        NUMERIC,
+        REAL,
+        SHORT,
+        TEXT,
+        TIME,
+        TIMESTAMP
     }
 
     private static final Map<DbDroidType, String> MAPPED_DATA_TYPES;
 
     static {
         HashMap<DbDroidType, String> basics = new HashMap<DbDroidType, String>();
-        basics.put(DbDroidType.BOOLEAN);
-        basics.put(DbDroidType.LONG);
-        basics.put(DbDroidType.SHORT);
-        basics.put(DbDroidType.INTEGER);
-        basics.put(DbDroidType.BYTE);
-        basics.put(DbDroidType.FLOAT);
-        basics.put(DbDroidType.DOUBLE);
-        basics.put(DbDroidType.CHARACTER);
-        basics.put(DbDroidType.STRING);
-        basics.put(DbDroidType.TIMESTAMP);
-        basics.put(DbDroidType.TIME);
-        basics.put(DbDroidType.DATE);
-        basics.put(DbDroidType.BIG_DECIMAL);
-        basics.put(DbDroidType.BIG_INTEGER);
-        basics.put(DbDroidType.LOCALE);
-        basics.put(DbDroidType.CALENDAR);
-        basics.put(DbDroidType.TIMEZONE);
-        basics.put(DbDroidType.OBJECT);
-        basics.put(DbDroidType.CLASS);
-        basics.put(DbDroidType.BINARY);
-        basics.put(DbDroidType.WRAPPER_BINARY);
-        basics.put(DbDroidType.CHAR_ARRAY);
-        basics.put(DbDroidType.CHARACTER_ARRAY);
-        basics.put(DbDroidType.BLOB);
-        basics.put(DbDroidType.CLOB);
-        basics.put(DbDroidType.SERIALIZABLE);
+        basics.put(DbDroidType.BOOLEAN, SQLiteDataType.BOOLEAN.toString());
+        basics.put(DbDroidType.LONG, SQLiteDataType.LONG.toString());
+        basics.put(DbDroidType.SHORT, SQLiteDataType.SHORT.toString());
+        basics.put(DbDroidType.INTEGER, SQLiteDataType.INTEGER.toString());
+        basics.put(DbDroidType.BYTE, "CHARACTER(1)");
+        basics.put(DbDroidType.FLOAT, SQLiteDataType.FLOAT.toString());
+        basics.put(DbDroidType.DOUBLE, SQLiteDataType.DOUBLE.toString());
+        basics.put(DbDroidType.CHARACTER, "CHARACTER(1)");
+        basics.put(DbDroidType.STRING, SQLiteDataType.TEXT.toString());
+        basics.put(DbDroidType.TIMESTAMP, SQLiteDataType.TIMESTAMP.toString());
+        basics.put(DbDroidType.TIME, SQLiteDataType.TIME.toString());
+        basics.put(DbDroidType.DATE, SQLiteDataType.DATE.toString());
+        basics.put(DbDroidType.BIG_DECIMAL, "DECIMAL(10,5)");
+        basics.put(DbDroidType.BIG_INTEGER, SQLiteDataType.BIGINT.toString());
+        basics.put(DbDroidType.LOCALE, "VARCHAR(50)");
+        basics.put(DbDroidType.CALENDAR, SQLiteDataType.DATE.toString());
+        basics.put(DbDroidType.TIMEZONE, SQLiteDataType.DATETIME.toString());
+        basics.put(DbDroidType.OBJECT, SQLiteDataType.JAVA_OBJECT.toString());
+        basics.put(DbDroidType.CLASS, SQLiteDataType.JAVA_OBJECT.toString());
+        basics.put(DbDroidType.BINARY, SQLiteDataType.BLOB.toString());
+        basics.put(DbDroidType.WRAPPER_BINARY, SQLiteDataType.BLOB.toString());
+        basics.put(DbDroidType.CHAR_ARRAY, "CHARACTER(255)");
+        basics.put(DbDroidType.CHARACTER_ARRAY, "VARCHAR(255)");
+        basics.put(DbDroidType.BLOB, SQLiteDataType.BLOB.toString());
+        basics.put(DbDroidType.CLOB, SQLiteDataType.CLOB.toString());
+        basics.put(DbDroidType.SERIALIZABLE, SQLiteDataType.BLOB.toString());
 
         MAPPED_DATA_TYPES = Collections.unmodifiableMap(basics);
     }
 
-    /*private enum DataType {
-        INT
-        INTEGER
-        TINYINT
-        SMALLINT                 // INTEGER 
-        MEDIUMINT
-        BIGINT
-        UNSIGNED BIG INT
-        INT2
-        INT8 
-        
-        CHARACTER(20)
-        VARCHAR(255)
-        VARYING CHARACTER(255)   // TEXT 
-        NCHAR(55)
-        NATIVE CHARACTER(70)
-        NVARCHAR(100)
-        TEXT
-        CLOB 
-        
-        BLOB                     // NONE
-        
-        REAL
-        DOUBLE
-        DOUBLE PRECISION         // REAL 
-        FLOAT 
-        
-        NUMERIC
-        DECIMAL(10,5)
-        BOOLEAN                  // NUMERIC 
-        DATE
-        DATETIME 
-    }*/
+    private final DataType dataType = new DataType(MAPPED_DATA_TYPES);
 
     private final SQLiteHelper sqliteHelper;
 
@@ -209,28 +182,46 @@ public class SQLiteDataBaseManager extends DataBaseManager {
 
     @Override
     protected void onCreateTable(String tableName, Field[] fields) {
-        String sql = "CREATE TABLE " + tableName;
-        for (Field field : fields) {
-            field.getType();
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("CREATE TABLE ").append(tableName).append("(");
+        StringBuilder fieldsBuilder = new StringBuilder();
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[i];
+            String columnName = EntityHelper.getColumnName(field);
+            boolean isIdField = EntityHelper.isIdField(field);
+            String type = dataType.getMappedType(field.getType());
+            fieldsBuilder.append(columnName).append(" ").append(type);
+            if (isIdField) {
+                fieldsBuilder.append(" PRIMARY KEY AUTOINCREMENT");
+            }
+            if (i < (fields.length - 1)) {
+                fieldsBuilder.append(",");
+            }
         }
-        sqliteHelper.getDatabase().execSQL(sql);
+        sqlBuilder.append(fieldsBuilder);
+        sqlBuilder.append(")");
+
+        sqliteHelper.getDatabase().execSQL(sqlBuilder.toString());
     }
 
     @Override
     protected void onUpdateTable(String tableName, Field[] fields) {
-        sqliteHelper.getDatabase().execSQL(sql);
+        StringBuilder sqlBuilder = new StringBuilder();
+
+        sqliteHelper.getDatabase().execSQL(sqlBuilder.toString());
     }
 
     @Override
     protected void onResetTable(String tableName, Field[] fields) {
-        sqliteHelper.getDatabase().execSQL(sql);
+        sqliteHelper.getDatabase().execSQL("DROP TABLE " + tableName);
+        onCreateTable(tableName, fields);
     }
 
     @Override
     public void delete(Object entity) {
         String tableName = EntityHelper.getTableName(entity.getClass());
         Field idField = EntityHelper.getIdField(entity.getClass());
-        String columnName = EntityHelper.getColumnName(idField, entity.getClass());
+        String columnName = EntityHelper.getColumnName(idField);
         Object idFieldValue = null;
         try {
             idFieldValue = FieldUtils.readField(idField, entity, true);
@@ -273,7 +264,12 @@ public class SQLiteDataBaseManager extends DataBaseManager {
 
     @Override
     public void rawQuery(String query) {
-        sqliteHelper.getDatabase().rawQuery(sql, selectionArgs)
+        sqliteHelper.getDatabase().rawQuery(query, null);
+    }
+
+    @Override
+    public List<?> queryList(Query query) {
+        return null;
     }
 
     private <T> T makeEntity(Class<T> entityClazz, Cursor cursor) {
@@ -338,6 +334,6 @@ public class SQLiteDataBaseManager extends DataBaseManager {
 
     @Override
     public DataType getDataType() {
-        return new DataType(MAPPED_DATA_TYPES);
+        return dataType;
     }
 }

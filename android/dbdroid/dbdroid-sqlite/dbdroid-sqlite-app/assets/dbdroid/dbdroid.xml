@@ -9,6 +9,6 @@
 
 	<dbdroid:properties>
 		<dbdroid:property name="dbdroid.show_query" value="true" />
-		<dbdroid:property name="dbdroid.generate">update</dbdroid:property>
+		<dbdroid:property name="dbdroid.generate">create</dbdroid:property>
 	</dbdroid:properties>
 </dbdroid:dbdroid-configuration>

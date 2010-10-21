@@ -43,6 +43,11 @@ public final class EntityHelper {
         return field;
     }
 
+    public static boolean isIdField(Field field) {
+        Annotation idAnnotation = AnnotationUtils.getAnnotation(field, Id.class);
+        return idAnnotation != null;
+    }
+
     public static Field getFieldByColumnName(String columnName, Class<?> entityClass) {
         // Search a field with a Column annotation where name is columnName
         Field[] fields = AnnotationUtils.findFields(entityClass, Column.class);
@@ -63,7 +68,7 @@ public final class EntityHelper {
         return FieldUtils.getField(entityClass, columnName, true);
     }
 
-    public static String getColumnName(Field field, Class<?> clazz) {
+    public static String getColumnName(Field field) {
         String columnName = null;
 
         if (field != null) {

@@ -43,9 +43,9 @@ public abstract class DataBaseManager {
     private static final String RESET_VALUE = "reset";
 
     private enum PropertyKey {
-        GENERATE_DB("dbdroid.generate"), 
-        SHOW_QUERY("dbdroid.show_query"), 
-        SCRIPT("dbdroid.script"), 
+        GENERATE_DB("dbdroid.generate"),
+        SHOW_QUERY("dbdroid.show_query"),
+        SCRIPT("dbdroid.script"),
         SCRIPT_ENCODING("dbdroid.script_encoding");
 
         private String key;
@@ -344,6 +344,8 @@ public abstract class DataBaseManager {
     public abstract <E> E saveOrUpdate(E entity);
 
     public abstract void rawQuery(String query);
+
+    public abstract List<?> queryList(Query query);
 
     public abstract DataType getDataType();
 
