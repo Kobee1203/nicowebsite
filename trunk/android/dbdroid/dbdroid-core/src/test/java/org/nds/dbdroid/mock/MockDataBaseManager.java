@@ -12,6 +12,7 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.reflect.ConstructorUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.nds.dbdroid.DataBaseManager;
+import org.nds.dbdroid.Query;
 import org.nds.dbdroid.annotation.Id;
 import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.log.Logger;
@@ -157,6 +158,11 @@ public class MockDataBaseManager extends DataBaseManager {
                 log.warn("Entity not found from table name: " + tableName);
             }
         }
+    }
+
+    @Override
+    public List<?> queryList(Query query) {
+        return null;
     }
 
     @Override
