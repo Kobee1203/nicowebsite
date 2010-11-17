@@ -14,21 +14,29 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.ClassUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.reflect.ConstructorUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.nds.dbdroid.DataBaseManager;
-import org.nds.dbdroid.Query;
 import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.helper.EntityHelper;
 import org.nds.dbdroid.log.Logger;
+import org.nds.dbdroid.query.Condition;
+import org.nds.dbdroid.query.Condition.Operation;
+import org.nds.dbdroid.query.Conjunction;
+import org.nds.dbdroid.query.Query;
+import org.nds.dbdroid.query.QueryValueResolver;
 import org.nds.dbdroid.type.DataType;
 import org.nds.dbdroid.type.DbDroidType;
+import org.nds.dbdroid.type.TypedValue;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Parcel;
 
 public class SQLiteDataBaseManager extends DataBaseManager {
 
@@ -140,7 +148,7 @@ public class SQLiteDataBaseManager extends DataBaseManager {
 
                 // Path to the just created empty db
                 File outFileName = new File(dbPath + name);
-                if (!outFileName.getParentFile().mkdirs()) {
+                if (!outFileName.getParentFile().exists() && !outFileName.getParentFile().mkdirs()) {
                     throw new Error("Error creating folder '" + outFileName.getParentFile().getAbsolutePath() + "' to copy database");
                 }
 
@@ -213,7 +221,7 @@ public class SQLiteDataBaseManager extends DataBaseManager {
 
     @Override
     protected void onResetTable(String tableName, Field[] fields) {
-        sqliteHelper.getDatabase().execSQL("DROP TABLE " + tableName);
+        sqliteHelper.getDatabase().execSQL("DROP TABLE IF EXISTS " + tableName);
         onCreateTable(tableName, fields);
     }
 
@@ -232,34 +240,43 @@ public class SQLiteDataBaseManager extends DataBaseManager {
     }
 
     @Override
-    public <T> List<T> findAll(Class<T> entityClazz) {
-        List<T> entities = null;
-
-        String tableName = EntityHelper.getTableName(entityClazz);
-        Cursor cursor = sqliteHelper.getDatabase().query(tableName, null, null, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            entities = new ArrayList<T>();
-            do {
-                // Make entity with columns values
-                T entity = makeEntity(entityClazz, cursor);
-                // Add new entity
-                entities.add(entity);
-            } while (cursor.moveToNext());
-        }
+    public <E> List<E> findAll(Class<E> entityClazz) {
+        Query query = createQuery(entityClazz);
+        List<E> entities = queryList(query);
 
         return entities;
     }
 
     @Override
     public <E> E findById(String id, Class<E> entityClazz) {
-        // TODO Auto-generated method stub
-        return null;
+        Query query = createQuery(entityClazz);
+        query = query.setDistinct(true);
+        query = query.groupBy("_id");
+        query = query.having(null);
+        query = query.orderBy(null);
+        query = query.setFirstRow(0);
+        query = query.setMaxRows(-1);
+
+        List<E> list = queryList(query);
+
+        return list == null ? null : list.get(0);
     }
 
     @Override
     public <E> E saveOrUpdate(E entity) {
-        // TODO Auto-generated method stub
-        return null;
+        String tableName = EntityHelper.getTableName(entity.getClass());
+
+        Map<String, Object> map = EntityHelper.getColumnNamesWithValues(entity);
+        Parcel parcel = Parcel.obtain();
+        parcel.writeMap(map);
+        ContentValues contentValues = ContentValues.CREATOR.createFromParcel(parcel);
+
+        long id = sqliteHelper.getDatabase().insertOrThrow(tableName, null, contentValues);
+
+        // Write id value
+        EntityHelper.writeField(EntityHelper.getIdField(entity.getClass()), id, entity);
+
+        return entity;
     }
 
     @Override
@@ -267,13 +284,45 @@ public class SQLiteDataBaseManager extends DataBaseManager {
         sqliteHelper.getDatabase().rawQuery(query, null);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public List<?> queryList(Query query) {
-        return null;
+    public <E> List<E> queryList(Query query) {
+        Class<E> entityClass = (Class<E>) query.getEntityClass();
+        List<E> entities = new ArrayList<E>();
+
+        String tableName = EntityHelper.getTableName(entityClass);
+        String whereClause = null;
+        String[] whereArgs = null;
+        Cursor cursor = sqliteHelper.getDatabase().query(query.isDistinct(), tableName, null, whereClause, whereArgs, query.getGroupBy(),
+                query.getHaving(), query.getOrderBy(), getLimit(query.getFirstRow(), query.getMaxRows()));
+        if (cursor.moveToFirst()) {
+            do {
+                // Make entity with columns values
+                E entity = makeEntity(entityClass, cursor);
+                // Add new entity
+                entities.add(entity);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        return entities;
     }
 
-    private <T> T makeEntity(Class<T> entityClazz, Cursor cursor) {
-        T entity = null;
+    public static String getLimit(int firstRow, int maxRows) {
+        String limit = null;
+        if (maxRows != -1) {
+            limit = String.valueOf(maxRows);
+            if (firstRow != -1) {
+                limit = String.valueOf(firstRow) + ", " + limit;
+            }
+        }
+
+        return limit;
+    }
+
+    private <E> E makeEntity(Class<E> entityClazz, Cursor cursor) {
+        E entity = null;
         try {
             entity = ConstructorUtils.invokeConstructor(entityClazz, (Object[]) null);
 
@@ -336,4 +385,134 @@ public class SQLiteDataBaseManager extends DataBaseManager {
     public DataType getDataType() {
         return dataType;
     }
+
+    @Override
+    protected QueryValueResolver getQueryValueResolver() {
+        return new SQLiteQueryValueResolver();
+    }
+
+    @Override
+    protected String onExpressionString(Condition condition, QueryValueResolver queryValueResolver) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(condition.getName()).append(getOperationWithValue(condition.getOperation(), condition.getValue(queryValueResolver)));
+        return null;
+    }
+
+    @Override
+    protected String onExpressionString(Conjunction conjunction, QueryValueResolver queryValueResolver) {
+        conjunction.getExpression1().toQueryString(this);
+        conjunction.getExpression2().toQueryString(this);
+        conjunction.getLogicalConjunction();
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private String getOperationWithValue(Operation operation, String value) {
+        String op = "";
+        switch (operation) {
+            case EQUAL:
+                op = " = ";
+                break;
+            case NOT_EQUAL:
+                op = " <> ";
+                break;
+            case GREATER_THAN:
+                op = " > ";
+                break;
+            case GREATER_THAN_OR_EQUAL:
+                op = " >= ";
+                break;
+            case LESS_THAN:
+                op = " < ";
+                break;
+            case LESS_THAN_OR_EQUAL:
+                op = " <= ";
+                break;
+            case LIKE:
+                op = " like ";
+                break;
+            case IN:
+                op = " in ";
+                break;
+            case NOT_IN:
+                op = " not in ";
+                break;
+            case IS_NULL:
+                op = " is null";
+                break;
+            case IS_NOT_NULL:
+                op = " is not null";
+                break;
+            default:
+                op = "undefined: " + operation;
+                break;
+        }
+
+        return op;
+    }
+
+    private String getStringValue(Operation operation, TypedValue typedValue) {
+        getQueryValueResolver();
+        String value = StringUtils.toString(typedValue.getValue());
+
+        String mappedType = MAPPED_DATA_TYPES.get(typedValue.getType());
+        switch (typedValue.getType()) {
+            case BOOLEAN:
+                break;
+            case LONG:
+                break;
+            case SHORT:
+                break;
+            case INTEGER:
+                break;
+            case BYTE:
+                break;
+            case FLOAT:
+                break;
+            case DOUBLE:
+                break;
+            case CHARACTER:
+                break;
+            case TIMESTAMP:
+                break;
+            case TIME:
+                break;
+            case DATE:
+                break;
+            case BIG_DECIMAL:
+                break;
+            case BIG_INTEGER:
+                break;
+            case LOCALE:
+                break;
+            case CALENDAR:
+                break;
+            case TIMEZONE:
+                break;
+            case OBJECT:
+                break;
+            case CLASS:
+                break;
+            case BINARY:
+                break;
+            case WRAPPER_BINARY:
+                break;
+            case CHAR_ARRAY:
+                break;
+            case CHARACTER_ARRAY:
+                break;
+            case BLOB:
+                break;
+            case CLOB:
+                break;
+            case SERIALIZABLE:
+                break;
+            default:
+                // SELECT beginning
+                // else ''
+                break;
+        }
+        return null;
+    }
+
 }
