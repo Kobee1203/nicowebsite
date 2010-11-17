@@ -22,7 +22,10 @@ import org.nds.dbdroid.dao.AndroidDAO;
 import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.helper.EntityHelper;
 import org.nds.dbdroid.log.Logger;
-import org.nds.dbdroid.reflect.utils.ReflectUtils;
+import org.nds.dbdroid.query.Condition;
+import org.nds.dbdroid.query.Conjunction;
+import org.nds.dbdroid.query.Query;
+import org.nds.dbdroid.query.QueryValueResolver;
 import org.nds.dbdroid.type.DataType;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXNotRecognizedException;
@@ -90,7 +93,7 @@ public abstract class DataBaseManager {
      * 
      * @param xmlConfigValidating
      */
-    public void setXmlConfigValidating(boolean xmlConfigValidating) {
+    public final void setXmlConfigValidating(boolean xmlConfigValidating) {
         this.xmlConfigValidating = xmlConfigValidating;
     }
 
@@ -99,7 +102,7 @@ public abstract class DataBaseManager {
      * 
      * @param classLoader
      */
-    public void setClassLoader(ClassLoader classLoader) {
+    public final void setClassLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
     }
 
@@ -158,22 +161,22 @@ public abstract class DataBaseManager {
             PropertyKey propertyKey = PropertyKey.getValueOf(key);
             if (propertyKey != null) {
                 switch (propertyKey) {
-                case GENERATE_DB:
-                    log.debug("-- generate DB --");
-                    generateDataBase(value);
-                    break;
-                case SCRIPT:
-                    log.debug("-- script --");
-                    String encoding = properties.getProperty(PropertyKey.SCRIPT_ENCODING.toString());
-                    runScript(value, encoding);
-                    break;
-                case SCRIPT_ENCODING:
-                    log.debug("-- script encoding: " + value + " --");
-                case SHOW_QUERY:
-                    log.debug("-- show query --");
-                    break;
-                default:
-                    log.info("Property key: " + key + " (value: " + value + ")");
+                    case GENERATE_DB:
+                        log.debug("-- generate DB --");
+                        generateDataBase(value);
+                        break;
+                    case SCRIPT:
+                        log.debug("-- script --");
+                        String encoding = properties.getProperty(PropertyKey.SCRIPT_ENCODING.toString());
+                        runScript(value, encoding);
+                        break;
+                    case SCRIPT_ENCODING:
+                        log.debug("-- script encoding: " + value + " --");
+                    case SHOW_QUERY:
+                        log.debug("-- show query --");
+                        break;
+                    default:
+                        log.info("Property key: " + key + " (value: " + value + ")");
                 }
             } else {
                 log.warn("Unknown property key: " + key);
@@ -181,7 +184,7 @@ public abstract class DataBaseManager {
         }
     }
 
-    public <T extends AndroidDAO<?>> T getDAO(Class<T> daoClass) {
+    public final <T extends AndroidDAO<?>> T getDAO(Class<T> daoClass) {
         T dao = (T) daos.get(daoClass);
         if (dao == null) {
             throw new NullPointerException("DAO class '" + daoClass + "' not found. Verify the XML dbdroid configuration.");
@@ -189,16 +192,24 @@ public abstract class DataBaseManager {
         return dao;
     }
 
-    public Query createQuery(String sql) {
-        return new Query(this, sql);
-    }
-
-    protected AndroidDAO<?> getDAOFromEntity(Class<?> entity) {
+    protected final AndroidDAO<?> getDAOFromEntity(Class<?> entity) {
         return daoFromEntity.get(entity);
     }
 
     protected Class<?> getEntityFromTableName(String tableName) {
         return entityFromTableName.get(tableName);
+    }
+
+    public final Query createQuery(Class<?> entityClass) {
+        return new Query(this, entityClass);
+    }
+
+    public final String toExpressionString(Condition condition) {
+        return onExpressionString(condition, getQueryValueResolver());
+    }
+
+    public final String toExpressionString(Conjunction conjunction) {
+        return onExpressionString(conjunction, getQueryValueResolver());
     }
 
     private void generateDataBase(String type) throws DBDroidException {
@@ -209,7 +220,7 @@ public abstract class DataBaseManager {
                 log.debug("entityClass: " + entityClass);
                 String tableName = EntityHelper.getTableName(entityClass);
                 log.debug("Table name: " + tableName);
-                Field[] fields = ReflectUtils.getPropertyFields(entityClass);
+                Field[] fields = EntityHelper.getFields(entityClass);
                 log.debug("fields: " + fields);
 
                 daoFromEntity.put(entityClass, dao);
@@ -345,8 +356,14 @@ public abstract class DataBaseManager {
 
     public abstract void rawQuery(String query);
 
-    public abstract List<?> queryList(Query query);
+    public abstract <E> List<E> queryList(Query query);
 
     public abstract DataType getDataType();
+
+    protected abstract QueryValueResolver getQueryValueResolver();
+
+    protected abstract String onExpressionString(Condition condition, QueryValueResolver queryValueResolver);
+
+    protected abstract String onExpressionString(Conjunction conjunction, QueryValueResolver queryValueResolver);
 
 }

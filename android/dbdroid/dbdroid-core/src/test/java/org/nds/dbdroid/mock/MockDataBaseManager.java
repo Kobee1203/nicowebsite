@@ -12,10 +12,13 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.reflect.ConstructorUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.nds.dbdroid.DataBaseManager;
-import org.nds.dbdroid.Query;
 import org.nds.dbdroid.annotation.Id;
 import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.log.Logger;
+import org.nds.dbdroid.query.Condition;
+import org.nds.dbdroid.query.Conjunction;
+import org.nds.dbdroid.query.Query;
+import org.nds.dbdroid.query.QueryValueResolver;
 import org.nds.dbdroid.reflect.utils.AnnotationUtils;
 import org.nds.dbdroid.type.DataType;
 
@@ -161,12 +164,30 @@ public class MockDataBaseManager extends DataBaseManager {
     }
 
     @Override
-    public List<?> queryList(Query query) {
+    public <E> List<E> queryList(Query query) {
         return null;
     }
 
     @Override
     public DataType getDataType() {
+        return null;
+    }
+
+    @Override
+    protected QueryValueResolver getQueryValueResolver() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected String onExpressionString(Condition condition, QueryValueResolver queryValueResolver) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected String onExpressionString(Conjunction conjunction, QueryValueResolver queryValueResolver) {
+        // TODO Auto-generated method stub
         return null;
     }
 }

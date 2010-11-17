@@ -2,6 +2,7 @@ package org.nds.dbdroid.sqlite.test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import junit.framework.Assert;
 
@@ -10,7 +11,9 @@ import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.log.Logger;
 import org.nds.dbdroid.sqlite.SQLiteDataBaseManager;
 import org.nds.dbdroid.sqlite.dao.Object1Dao;
+import org.nds.dbdroid.sqlite.entity.Object1;
 import org.nds.dbdroid.sqlite.test.dao.TestDao;
+import org.nds.dbdroid.sqlite.test.entity.Test;
 import org.nds.package_info.ClassPathPackageInfo;
 import org.nds.package_info.ClassPathPackageInfoSource;
 
@@ -76,10 +79,12 @@ public class SomeTest extends AndroidTestCase {
         dbManager.open();
 
         Object1Dao object1Dao = dbManager.getDAO(Object1Dao.class);
-        object1Dao.findAll();
+        List<Object1> object1List = object1Dao.findAll();
+        Assert.assertTrue("Object1 objects list is not empty: " + object1List, object1List.isEmpty());
 
         TestDao testDao = dbManager.getDAO(TestDao.class);
-        testDao.findAll();
+        List<Test> testList = testDao.findAll();
+        Assert.assertTrue("Test objects list is not empty: " + testList, testList.isEmpty());
 
         dbManager.close();
     }

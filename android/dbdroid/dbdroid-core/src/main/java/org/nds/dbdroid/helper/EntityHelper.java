@@ -2,6 +2,8 @@ package org.nds.dbdroid.helper;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.nds.dbdroid.annotation.Column;
@@ -9,6 +11,7 @@ import org.nds.dbdroid.annotation.Entity;
 import org.nds.dbdroid.annotation.Id;
 import org.nds.dbdroid.log.Logger;
 import org.nds.dbdroid.reflect.utils.AnnotationUtils;
+import org.nds.dbdroid.reflect.utils.ReflectUtils;
 
 public final class EntityHelper {
 
@@ -28,6 +31,31 @@ public final class EntityHelper {
         }
 
         return tableName;
+    }
+
+    public static Field[] getFields(Class<?> entityClass) {
+        return ReflectUtils.getPropertyFields(entityClass);
+    }
+
+    public static Map<String, Object> getColumnNamesWithValues(Object entity) {
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        Field[] fields = getFields(entity.getClass());
+        for (Field field : fields) {
+            String columnName = getColumnName(field);
+            Object value = null;
+            try {
+                value = FieldUtils.readField(field, entity, true);
+            } catch (IllegalAccessException e) {
+                log.error(e.getMessage(), e);
+            }
+            if (isIdField(field) && value == null) { // Don't store id field with value is NULL
+                continue;
+            }
+            map.put(columnName, value);
+        }
+
+        return map;
     }
 
     public static Field getIdField(Class<?> entityClass) {
@@ -88,4 +116,11 @@ public final class EntityHelper {
         return columnName;
     }
 
+    public static void writeField(Field field, Object value, Object entity) {
+        try {
+            FieldUtils.writeField(field, entity, value, true);
+        } catch (IllegalAccessException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 }
