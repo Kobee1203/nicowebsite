@@ -9,79 +9,83 @@ public class SQLiteQueryValueResolver extends QueryValueResolver {
 
     @Override
     protected String toNullString(Object value) {
-        // TODO Auto-generated method stub
-        return null;
+        return "";
+    }
+
+    @Override
+    protected String toStringString(String value) {
+        return "'" + value.toString() + "'";
     }
 
     @Override
     protected String toBooleanString(Boolean value) {
-        // TODO Auto-generated method stub
-        return null;
+        return value.toString();
     }
 
     @Override
     protected String toByteString(Byte value) {
-        // TODO Auto-generated method stub
-        return null;
+        return value.toString();
     }
 
     @Override
     protected String toShortString(Short value) {
-        // TODO Auto-generated method stub
-        return null;
+        return value.toString();
     }
 
     @Override
     protected String toCharacterString(Character value) {
-        // TODO Auto-generated method stub
-        return null;
+        return "'" + value.toString() + "'";
     }
 
     @Override
     protected String toIntegerString(Integer value) {
-        // TODO Auto-generated method stub
-        return null;
+        return value.toString();
     }
 
     @Override
     protected String toFloatString(Float value) {
-        // TODO Auto-generated method stub
-        return null;
+        return value.toString();
     }
 
     @Override
     protected String toLongString(Long value) {
-        // TODO Auto-generated method stub
-        return null;
+        return value.toString();
     }
 
     @Override
     protected String toDoubleString(Double value) {
-        // TODO Auto-generated method stub
-        return null;
+        return value.toString();
     }
 
     @Override
     protected String toNumberString(Number value) {
-        // TODO Auto-generated method stub
-        return null;
+        return value.toString();
     }
 
     @Override
     protected String toCollectionString(Collection<?> values) {
-        // TODO Auto-generated method stub
-        return null;
+        StringBuilder sb = new StringBuilder();
+        sb.append("(");
+        int i = 0;
+        for (Object value : values) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append(toString(value));
+            i++;
+        }
+        sb.append(")");
+
+        return sb.toString();
     }
 
     @Override
     protected String toMapString(Map<?, ?> value) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     protected String toObjectString(Object value) {
-        // TODO Auto-generated method stub
         return null;
     }
 

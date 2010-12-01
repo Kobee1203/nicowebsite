@@ -15,8 +15,8 @@ import org.nds.dbdroid.DataBaseManager;
 import org.nds.dbdroid.annotation.Id;
 import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.log.Logger;
-import org.nds.dbdroid.query.Condition;
-import org.nds.dbdroid.query.Conjunction;
+import org.nds.dbdroid.query.LogicalOperator;
+import org.nds.dbdroid.query.Operator;
 import org.nds.dbdroid.query.Query;
 import org.nds.dbdroid.query.QueryValueResolver;
 import org.nds.dbdroid.reflect.utils.AnnotationUtils;
@@ -40,6 +40,11 @@ public class MockDataBaseManager extends DataBaseManager {
     @Override
     public void onClose() {
         log.debug("## close");
+    }
+
+    @Override
+    protected void onCheckEntity(Class<?> entityClass) throws DBDroidException {
+        // Nothing to do
     }
 
     @Override
@@ -179,14 +184,26 @@ public class MockDataBaseManager extends DataBaseManager {
         return null;
     }
 
-    @Override
-    protected String onExpressionString(Condition condition, QueryValueResolver queryValueResolver) {
+    /*@Override
+    protected String onExpressionString(SimpleExpression condition, QueryValueResolver queryValueResolver) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    protected String onExpressionString(Conjunction conjunction, QueryValueResolver queryValueResolver) {
+    protected String onExpressionString(LogicalExpression conjunction, QueryValueResolver queryValueResolver) {
+        // TODO Auto-generated method stub
+        return null;
+    }*/
+
+    @Override
+    protected String onExpressionString(Operator operator, String value) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected String onExpressionString(LogicalOperator logicalConjunction, String expression) {
         // TODO Auto-generated method stub
         return null;
     }

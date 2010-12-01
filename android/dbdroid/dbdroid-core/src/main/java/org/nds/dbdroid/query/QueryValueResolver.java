@@ -7,18 +7,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.nds.dbdroid.type.TypedValue;
 
 public abstract class QueryValueResolver {
-
-    public String toString(TypedValue typedValue) {
-        return null;
-    }
 
     public String toString(Object value) {
         String resultValue = null;
         if (value == null) {
             resultValue = toNullString(value);
+        } else if (value instanceof String) {
+            resultValue = toStringString((String) value);
         } else if (value instanceof Boolean) {
             resultValue = toBooleanString((Boolean) value);
         } else if (value instanceof Byte) {
@@ -63,6 +60,15 @@ public abstract class QueryValueResolver {
      * @return <code>null</code> converted to String
      */
     protected abstract String toNullString(Object value);
+
+    /**
+     * Converts {@link String} value to a formatted String
+     * 
+     * @param value
+     *            : {@link String} value
+     * @return {@link String} converted to String
+     */
+    protected abstract String toStringString(String value);
 
     /**
      * Converts {@link Boolean} value to a String
