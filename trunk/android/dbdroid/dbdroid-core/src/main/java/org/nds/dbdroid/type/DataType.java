@@ -94,6 +94,10 @@ public class DataType {
         }
     }
 
+    public DbDroidType getDbDroidType(Class<?> clazz) {
+        return DATA_TYPES.get(clazz.getName());
+    }
+
     public String getMappedType(Class<?> clazz) {
         return this.typeToMappedTypeMap.get(clazz.getName());
     }

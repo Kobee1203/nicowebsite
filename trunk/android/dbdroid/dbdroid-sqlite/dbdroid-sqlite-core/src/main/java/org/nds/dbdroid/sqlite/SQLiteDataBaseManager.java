@@ -14,18 +14,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.ClassUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.reflect.ConstructorUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.nds.dbdroid.DataBaseManager;
 import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.helper.EntityHelper;
 import org.nds.dbdroid.log.Logger;
-import org.nds.dbdroid.query.Condition;
-import org.nds.dbdroid.query.Condition.Operation;
-import org.nds.dbdroid.query.Conjunction;
+import org.nds.dbdroid.query.LogicalOperator;
+import org.nds.dbdroid.query.Operator;
 import org.nds.dbdroid.query.Query;
 import org.nds.dbdroid.query.QueryValueResolver;
+import org.nds.dbdroid.query.SimpleExpression;
 import org.nds.dbdroid.type.DataType;
 import org.nds.dbdroid.type.DbDroidType;
 import org.nds.dbdroid.type.TypedValue;
@@ -189,6 +188,18 @@ public class SQLiteDataBaseManager extends DataBaseManager {
     }
 
     @Override
+    protected void onCheckEntity(Class<?> entityClass) throws DBDroidException {
+        Field idField = EntityHelper.getIdField(entityClass);
+        if (idField == null) {
+            throw new DBDroidException("Field with annotation Id not found in the Entity '" + entityClass.getCanonicalName() + "'");
+        }
+        if (!ClassUtils.isAssignable(Integer.class, idField.getType(), true)) {
+            throw new DBDroidException("Field with annotation Id in the Entity '" + entityClass.getCanonicalName() + "' must be of type "
+                    + Integer.TYPE + " and not of type '" + idField.getType().getCanonicalName() + "'");
+        }
+    }
+
+    @Override
     protected void onCreateTable(String tableName, Field[] fields) {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("CREATE TABLE ").append(tableName).append("(");
@@ -249,13 +260,17 @@ public class SQLiteDataBaseManager extends DataBaseManager {
 
     @Override
     public <E> E findById(String id, Class<E> entityClazz) {
+        Field field = EntityHelper.getIdField(entityClazz);
+        String idColumnName = EntityHelper.getColumnName(field);
+
         Query query = createQuery(entityClazz);
         query = query.setDistinct(true);
-        query = query.groupBy("_id");
+        query = query.groupBy(idColumnName);
         query = query.having(null);
         query = query.orderBy(null);
         query = query.setFirstRow(0);
         query = query.setMaxRows(-1);
+        query = query.add(new SimpleExpression(idColumnName, new TypedValue(id, getDataType().getDbDroidType(field.getType())), Operator.EQUAL));
 
         List<E> list = queryList(query);
 
@@ -267,8 +282,10 @@ public class SQLiteDataBaseManager extends DataBaseManager {
         String tableName = EntityHelper.getTableName(entity.getClass());
 
         Map<String, Object> map = EntityHelper.getColumnNamesWithValues(entity);
+
         Parcel parcel = Parcel.obtain();
         parcel.writeMap(map);
+        parcel.setDataPosition(0);
         ContentValues contentValues = ContentValues.CREATOR.createFromParcel(parcel);
 
         long id = sqliteHelper.getDatabase().insertOrThrow(tableName, null, contentValues);
@@ -335,7 +352,7 @@ public class SQLiteDataBaseManager extends DataBaseManager {
 
                 Object value = getValue(idx, field.getType(), cursor);
 
-                FieldUtils.writeField(field, entity, value, true);
+                EntityHelper.writeField(field, entity, value);
             }
         } catch (NoSuchMethodException e) {
             log.error(e.getMessage(), e);
@@ -391,25 +408,24 @@ public class SQLiteDataBaseManager extends DataBaseManager {
         return new SQLiteQueryValueResolver();
     }
 
-    @Override
-    protected String onExpressionString(Condition condition, QueryValueResolver queryValueResolver) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(condition.getName()).append(getOperationWithValue(condition.getOperation(), condition.getValue(queryValueResolver)));
-        return null;
+    /*@Override
+    protected String onExpressionString(SimpleExpression expression, QueryValueResolver queryValueResolver) {
+        return expression.getName() + expression.getOperator().toQueryString(this) + expression.getValue(queryValueResolver);
     }
 
     @Override
-    protected String onExpressionString(Conjunction conjunction, QueryValueResolver queryValueResolver) {
-        conjunction.getExpression1().toQueryString(this);
-        conjunction.getExpression2().toQueryString(this);
-        conjunction.getLogicalConjunction();
-        // TODO Auto-generated method stub
-        return null;
-    }
+    protected String onExpressionString(LogicalExpression conjunction, QueryValueResolver queryValueResolver) {
+        String expr1 = conjunction.getExpression1().toQueryString(this);
+        String expr2 = conjunction.getExpression2().toQueryString(this);
+        String logicalConjunction = conjunction.getLogicalOperator().toQueryString(this);
 
-    private String getOperationWithValue(Operation operation, String value) {
-        String op = "";
-        switch (operation) {
+        return expr1 + " " + logicalConjunction + " " + expr2;
+    }*/
+
+    @Override
+    protected String onExpressionString(Operator operator, String value) {
+        String op;
+        switch (operator) {
             case EQUAL:
                 op = " = ";
                 break;
@@ -444,75 +460,31 @@ public class SQLiteDataBaseManager extends DataBaseManager {
                 op = " is not null";
                 break;
             default:
-                op = "undefined: " + operation;
+                op = "undefined: " + operator;
                 break;
         }
 
         return op;
     }
 
-    private String getStringValue(Operation operation, TypedValue typedValue) {
-        getQueryValueResolver();
-        String value = StringUtils.toString(typedValue.getValue());
-
-        String mappedType = MAPPED_DATA_TYPES.get(typedValue.getType());
-        switch (typedValue.getType()) {
-            case BOOLEAN:
+    @Override
+    protected String onExpressionString(LogicalOperator logicalOperator, String expression) {
+        String logicalOp;
+        switch (logicalOperator) {
+            case NOT:
+                logicalOp = " not ";
                 break;
-            case LONG:
+            case AND:
+                logicalOp = " and ";
                 break;
-            case SHORT:
-                break;
-            case INTEGER:
-                break;
-            case BYTE:
-                break;
-            case FLOAT:
-                break;
-            case DOUBLE:
-                break;
-            case CHARACTER:
-                break;
-            case TIMESTAMP:
-                break;
-            case TIME:
-                break;
-            case DATE:
-                break;
-            case BIG_DECIMAL:
-                break;
-            case BIG_INTEGER:
-                break;
-            case LOCALE:
-                break;
-            case CALENDAR:
-                break;
-            case TIMEZONE:
-                break;
-            case OBJECT:
-                break;
-            case CLASS:
-                break;
-            case BINARY:
-                break;
-            case WRAPPER_BINARY:
-                break;
-            case CHAR_ARRAY:
-                break;
-            case CHARACTER_ARRAY:
-                break;
-            case BLOB:
-                break;
-            case CLOB:
-                break;
-            case SERIALIZABLE:
+            case OR:
+                logicalOp = " or ";
                 break;
             default:
-                // SELECT beginning
-                // else ''
+                logicalOp = "undefined: " + logicalOperator;
                 break;
         }
-        return null;
+        return logicalOp;
     }
 
 }

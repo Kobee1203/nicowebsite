@@ -16,16 +16,19 @@ import java.util.Properties;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.nds.dbdroid.annotation.Entity;
 import org.nds.dbdroid.config.ConfigXMLErrorHandler;
 import org.nds.dbdroid.config.ConfigXMLHandler;
 import org.nds.dbdroid.dao.AndroidDAO;
 import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.helper.EntityHelper;
 import org.nds.dbdroid.log.Logger;
-import org.nds.dbdroid.query.Condition;
-import org.nds.dbdroid.query.Conjunction;
+import org.nds.dbdroid.query.LogicalExpression;
+import org.nds.dbdroid.query.LogicalOperator;
+import org.nds.dbdroid.query.Operator;
 import org.nds.dbdroid.query.Query;
 import org.nds.dbdroid.query.QueryValueResolver;
+import org.nds.dbdroid.query.SimpleExpression;
 import org.nds.dbdroid.type.DataType;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXNotRecognizedException;
@@ -81,8 +84,13 @@ public abstract class DataBaseManager {
     private Properties properties;
     private Map<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> daos = new HashMap<Class<? extends AndroidDAO<?>>, AndroidDAO<?>>();
 
-    private final Map<String, Class<?>> entityFromTableName = new HashMap<String, Class<?>>();
     private final Map<Class<?>, AndroidDAO<?>> daoFromEntity = new HashMap<Class<?>, AndroidDAO<?>>();
+
+    private final Map<String, Class<?>> entityFromTableName = new HashMap<String, Class<?>>();
+
+    private final Map<Class<?>, String> tableNameFromEntity = new HashMap<Class<?>, String>();
+
+    private final Map<Class<?>, Field[]> fieldsFromEntity = new HashMap<Class<?>, Field[]>();
 
     public DataBaseManager(InputStream config) {
         this.config = config;
@@ -150,7 +158,32 @@ public abstract class DataBaseManager {
             throw new DBDroidException("XML Pasing Exception = " + e, e);
         }
 
+        initializeMaps();
+
         processProperties();
+    }
+
+    private void initializeMaps() throws DBDroidException {
+        try {
+            for (Map.Entry<Class<? extends AndroidDAO<?>>, AndroidDAO<?>> e : daos.entrySet()) {
+                AndroidDAO<?> dao = e.getValue();
+                Class<?> entityClass = dao.getEntityClass();
+                log.debug("entityClass: " + entityClass);
+                String tableName = EntityHelper.getTableName(entityClass);
+                log.debug("Table name: " + tableName);
+                Field[] fields = EntityHelper.getFields(entityClass);
+                log.debug("fields: " + fields);
+
+                daoFromEntity.put(entityClass, dao);
+                entityFromTableName.put(tableName, entityClass);
+                tableNameFromEntity.put(entityClass, tableName);
+                fieldsFromEntity.put(entityClass, fields);
+
+                onCheckEntity(entityClass);
+            }
+        } catch (Exception e) {
+            throw new DBDroidException(e.getMessage(), e);
+        }
     }
 
     private void processProperties() throws DBDroidException {
@@ -184,6 +217,7 @@ public abstract class DataBaseManager {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public final <T extends AndroidDAO<?>> T getDAO(Class<T> daoClass) {
         T dao = (T) daos.get(daoClass);
         if (dao == null) {
@@ -196,20 +230,40 @@ public abstract class DataBaseManager {
         return daoFromEntity.get(entity);
     }
 
+    public String getTableNameFromEntity(Class<?> entity) {
+        return tableNameFromEntity.get(entity);
+    }
+
     protected Class<?> getEntityFromTableName(String tableName) {
         return entityFromTableName.get(tableName);
+    }
+
+    protected Field[] getFieldsFromEntity(Class<?> entity) {
+        return fieldsFromEntity.get(entity);
     }
 
     public final Query createQuery(Class<?> entityClass) {
         return new Query(this, entityClass);
     }
 
-    public final String toExpressionString(Condition condition) {
-        return onExpressionString(condition, getQueryValueResolver());
+    public final String toExpressionString(SimpleExpression expression) {
+        String name = expression.getName();
+        String expr = toExpressionString(expression.getOperator(), expression.getValue(getQueryValueResolver()));
+        return name + expr;
     }
 
-    public final String toExpressionString(Conjunction conjunction) {
-        return onExpressionString(conjunction, getQueryValueResolver());
+    public final String toExpressionString(LogicalExpression expression) {
+        String expr1 = expression.getExpression1().toQueryString(this);
+        String expr2 = toExpressionString(expression.getLogicalOperator(), expression.getExpression2().toQueryString(this));
+        return expr1 + expr2;
+    }
+
+    public final String toExpressionString(Operator operator, String value) {
+        return onExpressionString(operator, value);
+    }
+
+    public final String toExpressionString(LogicalOperator logicalOperator, String expression) {
+        return onExpressionString(logicalOperator, expression);
     }
 
     private void generateDataBase(String type) throws DBDroidException {
@@ -218,13 +272,10 @@ public abstract class DataBaseManager {
                 AndroidDAO<?> dao = e.getValue();
                 Class<?> entityClass = dao.getEntityClass();
                 log.debug("entityClass: " + entityClass);
-                String tableName = EntityHelper.getTableName(entityClass);
+                String tableName = tableNameFromEntity.get(entityClass);
                 log.debug("Table name: " + tableName);
-                Field[] fields = EntityHelper.getFields(entityClass);
+                Field[] fields = fieldsFromEntity.get(entityClass);
                 log.debug("fields: " + fields);
-
-                daoFromEntity.put(entityClass, dao);
-                entityFromTableName.put(tableName, entityClass);
 
                 if (CREATE_VALUE.equalsIgnoreCase(type)) {
                     onCreateTable(tableName, fields);
@@ -336,34 +387,196 @@ public abstract class DataBaseManager {
         return query;
     }
 
+    /**
+     * Opens the connection to the database
+     * 
+     * @throws DBDroidException
+     *             if the connection opening fails.
+     */
     public abstract void onOpen() throws DBDroidException;
 
+    /**
+     * Closes the connection to the database
+     * 
+     * @throws DBDroidException
+     *             if the connection closing fails.
+     */
     public abstract void onClose() throws DBDroidException;
 
+    /**
+     * Checks if the {@link Entity} class is valid. If not, this method returns an {@link DBDroidException}
+     * 
+     * @param entityClass
+     *            : {@link Entity} class to check
+     * @throws DBDroidException
+     *             : throwed if the {@link Entity} is not valid
+     */
+    protected abstract void onCheckEntity(Class<?> entityClass) throws DBDroidException;
+
+    /**
+     * Creates a table
+     * 
+     * @param tableName
+     *            : table name
+     * @param fields
+     *            : {@link Entity} fields used to create the table
+     * @throws DBDroidException
+     *             : throwed if the table cannot be created
+     */
     protected abstract void onCreateTable(String tableName, Field[] fields) throws DBDroidException;
 
+    /**
+     * Updates a table
+     * 
+     * @param tableName
+     *            : table name
+     * @param fields
+     *            : {@link Entity} fields used to update the table
+     * @throws DBDroidException
+     *             throwed if the table cannot be updated
+     */
     protected abstract void onUpdateTable(String tableName, Field[] fields) throws DBDroidException;
 
+    /**
+     * Resets a table
+     * 
+     * @param tableName
+     *            : table name
+     * @param fields
+     *            : {@link Entity} fields used to reset the table
+     * @throws DBDroidException
+     */
     protected abstract void onResetTable(String tableName, Field[] fields) throws DBDroidException;
 
+    /**
+     * Deletes {@link Entity}
+     * 
+     * @param entity
+     *            : {@link Entity} to delete
+     */
     public abstract void delete(Object entity);
 
+    /**
+     * Finds all rows in database for {@link Entity} class in argument
+     * 
+     * @param <E>
+     *            : {@link Entity} type
+     * @param entityClass
+     *            : {@link Entity} class to find
+     * @return list of rows converted to {@link Entity} objects E
+     */
     public abstract <E> List<E> findAll(Class<E> entityClass);
 
-    public abstract <E> E findById(String id, Class<E> entityClazz);
+    /**
+     * Finds a row in database for {@link Entity} class in argument and with id in argument
+     * 
+     * @param <E>
+     *            : {@link Entity} type
+     * @param id
+     *            : id to find in database
+     * @param entityClass
+     *            : {@link Entity} class to find
+     * @return row converted to {@link Entity} object E
+     */
+    public abstract <E> E findById(String id, Class<E> entityClass);
 
+    /**
+     * Saves an {@link Entity} object
+     * 
+     * @param <E>
+     *            : {@link Entity} type
+     * @param entity
+     *            : {@link Entity} object
+     * @return {@link Entity} object saved or updated
+     */
     public abstract <E> E saveOrUpdate(E entity);
 
+    /**
+     * Runs the query in argument
+     * 
+     * @param query
+     *            : the raw query.
+     */
     public abstract void rawQuery(String query);
 
+    /**
+     * Runs a query according to the Query object in argument, and return the query result.
+     * 
+     * @param <E>
+     *            : {@link Entity} type
+     * @param query
+     *            : Query object
+     * @return: List of {@link Entity} objects found with the Query
+     */
     public abstract <E> List<E> queryList(Query query);
 
+    /**
+     * This method returns a DataType Object, containing the mapping between the java types and the DbDroidTypes and the database types
+     * 
+     * @return DataType object
+     */
     public abstract DataType getDataType();
 
+    /**
+     * Returns a {@link QueryValueResolver} used to convert an object value to a {@link String}.<br/>
+     * Resolves an object value used in a query. converts this value to a {@link String}.
+     * 
+     * @return
+     */
     protected abstract QueryValueResolver getQueryValueResolver();
 
-    protected abstract String onExpressionString(Condition condition, QueryValueResolver queryValueResolver);
+    /**
+     * Returns a {@link String} representing the {@link SimpleExpression} in argument. This method can use the {@link QueryValueResolver} object in
+     * argument to replace a value by a {@link String} recognized by the database engine in a query.<br/>
+     * This method is used in the method toExpressionString(SimpleExpression expression), used in the method toQueryString(DataBaseManager dbManager)
+     * from the {@link SimpleExpression} class to convert this {@link SimpleExpression} to a {@link String}.
+     * 
+     * @param expression
+     *            : {@link SimpleExpression} object
+     * @param queryValueResolver
+     *            : {@link QueryValueResolver}
+     * @return a {@link String} representing the {@link SimpleExpression} in argument
+     */
+    //protected abstract String onExpressionString(SimpleExpression expression, QueryValueResolver queryValueResolver);
 
-    protected abstract String onExpressionString(Conjunction conjunction, QueryValueResolver queryValueResolver);
+    /**
+     * Returns a {@link String} representing the {@link LogicalExpression} in argument. This method can use the {@link QueryValueResolver} object in
+     * argument to replace a value by a {@link String} recognized by the database engine in a query.<br/>
+     * This method is used in the method toExpressionString(LogicalExpression expression), used in the method toQueryString(DataBaseManager dbManager)
+     * from the {@link LogicalExpression} class to convert this {@link LogicalExpression} to a {@link String}.
+     * 
+     * @param expression
+     *            : {@link LogicalExpression} object
+     * @param queryValueResolver
+     *            : {@link QueryValueResolver}
+     * @return a {@link String} representing the {@link LogicalExpression} in argument
+     */
+    //protected abstract String onExpressionString(LogicalExpression expression, QueryValueResolver queryValueResolver);
+
+    /**
+     * Returns a {@link String} representing the {@link Operator} and the {@link String} value in argument.<br/>
+     * This method is used in the method toExpressionString(Operator operator), used in the method toQueryString(DataBaseManager dbManager) from the
+     * {@link Operator} class to convert this {@link Operator} to a {@link String}.
+     * 
+     * @param operator
+     *            : {@link Operator} object
+     * @param value
+     *            : {@link String} value
+     * @return a {@link String} representing the {@link Operator} and the {@link String} value in argument
+     */
+    protected abstract String onExpressionString(Operator operator, String value);
+
+    /**
+     * Returns a {@link String} representing the {@link LogicalOperator} and the {@link String} expression in argument.<br/>
+     * This method is used in the method toExpressionString(LogicalOperator logicalOperator), used in the method toQueryString(DataBaseManager
+     * dbManager) from the {@link LogicalOperator} class to convert this {@link LogicalOperator} to a {@link String}.
+     * 
+     * @param logicalOperator
+     *            : {@link LogicalOperator} object
+     * @param expression
+     *            : {@link String} expression after the logical operator
+     * @return a {@link String} representing the {@link LogicalOperator} and the {@link String} expression in argument
+     */
+    protected abstract String onExpressionString(LogicalOperator logicalOperator, String expression);
 
 }

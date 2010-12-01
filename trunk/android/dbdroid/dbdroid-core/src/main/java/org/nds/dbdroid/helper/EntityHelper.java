@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.alfresco.service.cmr.repository.datatype.DefaultTypeConverter;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.nds.dbdroid.annotation.Column;
 import org.nds.dbdroid.annotation.Entity;
@@ -43,12 +44,7 @@ public final class EntityHelper {
         Field[] fields = getFields(entity.getClass());
         for (Field field : fields) {
             String columnName = getColumnName(field);
-            Object value = null;
-            try {
-                value = FieldUtils.readField(field, entity, true);
-            } catch (IllegalAccessException e) {
-                log.error(e.getMessage(), e);
-            }
+            Object value = readField(field, entity);
             if (isIdField(field) && value == null) { // Don't store id field with value is NULL
                 continue;
             }
@@ -118,9 +114,20 @@ public final class EntityHelper {
 
     public static void writeField(Field field, Object value, Object entity) {
         try {
-            FieldUtils.writeField(field, entity, value, true);
+            Object v = DefaultTypeConverter.INSTANCE.convert(field.getType(), value);
+            FieldUtils.writeField(field, entity, v, true);
         } catch (IllegalAccessException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    public static Object readField(Field field, Object entity) {
+        Object value = null;
+        try {
+            value = FieldUtils.readField(field, entity, true);
+        } catch (IllegalAccessException e) {
+            log.error(e.getMessage(), e);
+        }
+        return value;
     }
 }

@@ -2,20 +2,16 @@ package org.nds.dbdroid.query;
 
 import org.nds.dbdroid.DataBaseManager;
 
-public class Conjunction implements Expression {
-    public enum LogicalConjunction {
-        AND,
-        OR
-    }
+public class LogicalExpression implements Expression {
 
     private final Expression expression1;
     private final Expression expression2;
-    private final LogicalConjunction logicalConjunction;
+    private final LogicalOperator logicalOperator;
 
-    public Conjunction(Expression expression1, Expression expression2, LogicalConjunction logicalConjunction) {
+    public LogicalExpression(Expression expression1, Expression expression2, LogicalOperator logicalOperator) {
         this.expression1 = expression1;
         this.expression2 = expression2;
-        this.logicalConjunction = logicalConjunction;
+        this.logicalOperator = logicalOperator;
     }
 
     public String toQueryString(DataBaseManager dbManager) {
@@ -30,7 +26,7 @@ public class Conjunction implements Expression {
         return expression2;
     }
 
-    public LogicalConjunction getLogicalConjunction() {
-        return logicalConjunction;
+    public LogicalOperator getLogicalOperator() {
+        return logicalOperator;
     }
 }

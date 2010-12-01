@@ -86,6 +86,12 @@ public class SomeTest extends AndroidTestCase {
         List<Test> testList = testDao.findAll();
         Assert.assertTrue("Test objects list is not empty: " + testList, testList.isEmpty());
 
+        Test test = new Test("Nicolas");
+        test = dbManager.saveOrUpdate(test);
+        log.debug("Entity saved: " + test.get_id());
+        Test test2 = testDao.findById(String.valueOf(test.get_id()));
+        Assert.assertNotNull("Test object is null: " + test2.get_id(), test2);
+
         dbManager.close();
     }
 }
