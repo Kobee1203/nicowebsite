@@ -130,4 +130,9 @@ public final class EntityHelper {
         }
         return value;
     }
+
+    public static <T> T readField(Field field, Object entity, Class<T> type) {
+        Object value = readField(field, entity);
+        return DefaultTypeConverter.INSTANCE.convert(type, value);
+    }
 }

@@ -9,6 +9,7 @@ import junit.framework.Assert;
 import org.nds.dbdroid.DataBaseManager;
 import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.log.Logger;
+import org.nds.dbdroid.query.Query;
 import org.nds.dbdroid.sqlite.SQLiteDataBaseManager;
 import org.nds.dbdroid.sqlite.dao.Object1Dao;
 import org.nds.dbdroid.sqlite.entity.Object1;
@@ -67,7 +68,7 @@ public class SomeTest extends AndroidTestCase {
         }
     }
 
-    public void testContext() throws IOException, DBDroidException, NameNotFoundException {
+    public void testPersistence() throws IOException, DBDroidException, NameNotFoundException {
         // ask for the code of the foreign context to be included and to ignore any security given by the cross-process(owner) execution
         // in working-environment to error checking ...
         Context ctx = getContext().createPackageContext("org.nds.dbdroid.sqlite", Context.CONTEXT_INCLUDE_CODE + Context.CONTEXT_IGNORE_SECURITY);
@@ -90,7 +91,36 @@ public class SomeTest extends AndroidTestCase {
         test = dbManager.saveOrUpdate(test);
         log.debug("Entity saved: " + test.get_id());
         Test test2 = testDao.findById(String.valueOf(test.get_id()));
-        Assert.assertNotNull("Test object is null: " + test2.get_id(), test2);
+        Assert.assertNotNull("Test object is null: " + test2, test2);
+        Assert.assertEquals("Nicolas", test2.getName());
+
+        /////////
+
+        Object1 o1 = new Object1("toto");
+        o1 = dbManager.saveOrUpdate(o1);
+        log.debug("Entity saved: " + o1.get_id());
+
+        Object1 o2 = new Object1("titi");
+        o2 = dbManager.saveOrUpdate(o2);
+        log.debug("Entity saved: " + o2.get_id());
+
+        Query query = dbManager.createQuery(Object1.class);
+        List<Object1> list = (List<Object1>) query.queryList();
+        Assert.assertTrue("Object1 objects list is empty: " + list, !list.isEmpty());
+        Assert.assertEquals(2, list.size());
+        for (Object1 o : list) {
+            log.debug(o.get_id() + ": " + o.getName());
+        }
+        dbManager.delete(list.get(0));
+
+        Integer id = list.get(1).get_id();
+        String name = list.get(1).getName();
+
+        list = object1Dao.findAll();
+        Assert.assertTrue("Object1 objects list is empty: " + list, !list.isEmpty());
+        Assert.assertEquals(1, list.size());
+        Assert.assertEquals(id, list.get(0).get_id());
+        Assert.assertEquals(name, list.get(0).getName());
 
         dbManager.close();
     }
