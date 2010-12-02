@@ -500,7 +500,8 @@ public abstract class DataBaseManager {
     public abstract void rawQuery(String query);
 
     /**
-     * Runs a query according to the Query object in argument, and return the query result.
+     * Runs a query according to the Query object in argument, and return the query result.<br/>
+     * Method called in the method queryList() from Query object.
      * 
      * @param <E>
      *            : {@link Entity} type

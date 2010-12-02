@@ -39,11 +39,13 @@ public class Query {
     public String toExpressionString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < expressions.size(); i++) {
-            if (i > 0) {
-                sb.append(LogicalOperator.AND.toQueryString(dataBaseManager));
-            }
             Expression expr = expressions.get(i);
-            sb.append(expr.toQueryString(dataBaseManager));
+            String s = expr.toQueryString(dataBaseManager);
+            if (i > 0) {
+                sb.append(dataBaseManager.toExpressionString(LogicalOperator.AND, s));
+            } else {
+                sb.append(s);
+            }
         }
 
         return sb.toString();

@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.reflect.ConstructorUtils;
-import org.apache.commons.lang.reflect.FieldUtils;
 import org.nds.dbdroid.DataBaseManager;
 import org.nds.dbdroid.exception.DBDroidException;
 import org.nds.dbdroid.helper.EntityHelper;
@@ -241,13 +240,8 @@ public class SQLiteDataBaseManager extends DataBaseManager {
         String tableName = EntityHelper.getTableName(entity.getClass());
         Field idField = EntityHelper.getIdField(entity.getClass());
         String columnName = EntityHelper.getColumnName(idField);
-        Object idFieldValue = null;
-        try {
-            idFieldValue = FieldUtils.readField(idField, entity, true);
-        } catch (IllegalAccessException e) {
-            log.error(e.getMessage(), e);
-        }
-        sqliteHelper.getDatabase().delete(tableName, columnName + " = ?", new String[] { (String) idFieldValue });
+        String idFieldValue = EntityHelper.readField(idField, entity, String.class);
+        sqliteHelper.getDatabase().delete(tableName, columnName + " = ?", new String[] { idFieldValue });
     }
 
     @Override
@@ -326,7 +320,7 @@ public class SQLiteDataBaseManager extends DataBaseManager {
         return entities;
     }
 
-    public static String getLimit(int firstRow, int maxRows) {
+    private static String getLimit(int firstRow, int maxRows) {
         String limit = null;
         if (maxRows != -1) {
             limit = String.valueOf(maxRows);
@@ -352,7 +346,7 @@ public class SQLiteDataBaseManager extends DataBaseManager {
 
                 Object value = getValue(idx, field.getType(), cursor);
 
-                EntityHelper.writeField(field, entity, value);
+                EntityHelper.writeField(field, value, entity);
             }
         } catch (NoSuchMethodException e) {
             log.error(e.getMessage(), e);
@@ -469,22 +463,22 @@ public class SQLiteDataBaseManager extends DataBaseManager {
 
     @Override
     protected String onExpressionString(LogicalOperator logicalOperator, String expression) {
-        String logicalOp;
+        String expr;
         switch (logicalOperator) {
             case NOT:
-                logicalOp = " not ";
+                expr = " not (" + expression + ")";
                 break;
             case AND:
-                logicalOp = " and ";
+                expr = " and " + expression;
                 break;
             case OR:
-                logicalOp = " or ";
+                expr = " or " + expression;
                 break;
             default:
-                logicalOp = "undefined: " + logicalOperator;
+                expr = "undefined: " + logicalOperator;
                 break;
         }
-        return logicalOp;
+        return expr;
     }
 
 }
