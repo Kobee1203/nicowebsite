@@ -5,7 +5,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
 	<!-- DATA ACCESS LAYER -->
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"	destroy-method="close">
+	<!--bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"	destroy-method="close">
 		<property name="driverClassName" value="org.gjt.mm.mysql.Driver" />
 		<property name="url" value="jdbc:mysql://localhost/john_dog" />
 		<property name="username" value="root" />
@@ -20,7 +20,16 @@
 		<property name="logAbandoned" value="true" />
 		<property name="poolPreparedStatements"	value="true" />
 		<property name="defaultAutoCommit" value="true" />
-	</bean>
+	</bean-->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+        <property name="url" value="jdbc:hsqldb:mem:Test"/>
+        <property name="username" value="sa"/>
+        <property name="password" value=""/>
+        
+        <property name="initialSize" value="10"/>
+        <property name="testOnBorrow" value="true"/>
+    </bean>
 
  <!-- SESSION FACTORIES -->
     <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
@@ -31,7 +40,7 @@
             <props>
 				<prop key="hibernate.hbm2ddl.auto">update</prop>
 
-                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop>
+                <!--prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop-->
                 <prop key="hibernate.show_sql">true</prop>
                 <prop key="hibernate.connection.release_mode">auto</prop>
 				<prop key="hibernate.jdbc.batch_size">20</prop>
